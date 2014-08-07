@@ -118,15 +118,6 @@ public class Tetris extends ApplicationAdapter {
         }
     }
 
-    private int getEmptyCount(int startIndex) {
-        System.out.println("startIndex = " + startIndex);
-        if (!checkEmpty(tetrisGrid[startIndex].clone())) {
-            return 0;
-        } else {
-            return 1 + getEmptyCount(startIndex + 1);
-        }
-    }
-
     private void checkCompleteRows() {
         clearCurrentBlock();
         int rowsRemoved = 0;
@@ -224,8 +215,6 @@ public class Tetris extends ApplicationAdapter {
 
     private void updateBlockPosition() {
         for (int[] blockCoords : blockCurrent.getBlockArray()) {
-            //System.out.println("blockCoords[0] = " + blockCoords[0]);
-            //System.out.println("blockCoords[1] = " + blockCoords[1]);
             tetrisGrid[blockCoords[0]][blockCoords[1]] = "[]";
         }
         tetrisGrid[blockCurrent.getCenter()[0]][blockCurrent.getCenter()[1]] = "[]";
@@ -281,22 +270,16 @@ public class Tetris extends ApplicationAdapter {
     }
 
     private void doGravity() {
-//        System.out.println("Center BEFORE = " + Arrays.toString(blockCurrent.getCenter()));
-//        System.out.println("playerScore = " + playerScore);
         clearCurrentBlock();
         for (int[] block: blockCurrent.getBlockArray()) {
             if (tetrisGrid[block[0] + 1][block[1]].equals("[]") ||
                 tetrisGrid[block[0] + 1][block[1]].equals("==")) {
                 updateBlockPosition();
                 setBlock();
-//                System.out.println("RANK");
-//                System.out.println("block[0] + 1 = " + (block[0] + 1));
-//                System.out.println("block[1] = " + block[1]);
                 return;
             }
         }
         updateBlockPosition(new int[] {blockCurrent.getCenter()[0] + 1, blockCurrent.getCenter()[1]});
-//        System.out.println("Center AFTER = " + Arrays.toString(blockCurrent.getCenter()));
         gravityTime = System.currentTimeMillis();
     }
 
