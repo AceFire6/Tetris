@@ -29,6 +29,7 @@ public class Tetris extends ApplicationAdapter {
     private boolean blockSet = false;
     private Random randBlock = new Random();
     private int gravity = 1;
+    private int gravityModifier = 1;
     private long oldTime;
     private long gravityTime;
     private boolean paused = false;
@@ -86,7 +87,7 @@ public class Tetris extends ApplicationAdapter {
 	}
 
     private void gameLoop() {
-        if (playerScore > playerLevel * 250) {
+        if (playerScore > playerLevel * 700) {
             playerLevel++;
             gravity++;
         }
@@ -100,15 +101,15 @@ public class Tetris extends ApplicationAdapter {
                 System.exit(0);
             }
             blockSet = false;
-            updateBlockPosition();
             checkCompleteRows();
-        }
-        if ((System.currentTimeMillis() - gravityTime) > (750 / gravity) && !blockSet) {
-            doGravity();
         }
         drawHeading();
         drawBoard();
         drawUI();
+        if ((System.currentTimeMillis() - gravityTime) > (800 / (gravity * gravityModifier)) &&
+            !blockSet) {
+            doGravity();
+        }
     }
 
     private void hardDrop() {
@@ -125,7 +126,7 @@ public class Tetris extends ApplicationAdapter {
             if (checkFull(tetrisGrid[i].clone())) {
                 eraseRow(i);
                 rowsRemoved++;
-                playerScore += (100 * rowsRemoved);
+                playerScore += (50 * rowsRemoved);
             }
         }
 
@@ -137,7 +138,6 @@ public class Tetris extends ApplicationAdapter {
                 }
             }
         }
-
         updateBlockPosition();
     }
 
@@ -165,9 +165,9 @@ public class Tetris extends ApplicationAdapter {
             oldTime = System.currentTimeMillis();
         }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            gravity = 10;
+            gravityModifier = 10;
         } else {
-            gravity = 1;
+            gravityModifier = 1;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             moveBlockLeft();
@@ -273,7 +273,7 @@ public class Tetris extends ApplicationAdapter {
         clearCurrentBlock();
         for (int[] block: blockCurrent.getBlockArray()) {
             if (tetrisGrid[block[0] + 1][block[1]].equals("[]") ||
-                tetrisGrid[block[0] + 1][block[1]].equals("==")) {
+                tetrisGrid[block[0] + 1][block[1]].equals("==") || blockSet) {
                 updateBlockPosition();
                 setBlock();
                 return;
@@ -287,7 +287,7 @@ public class Tetris extends ApplicationAdapter {
         blockSet = true;
         blockCurrent = blockNext.clone();
         blockNext = new TetrisBlock(randBlock.nextInt(7));
-        playerScore += 10 + (playerLevel * 2) * gravity;
+        playerScore += (20 * gravity);
     }
 
     private void drawHeading() {
