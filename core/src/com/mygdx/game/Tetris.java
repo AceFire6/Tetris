@@ -87,7 +87,7 @@ public class Tetris extends ApplicationAdapter {
 	}
 
     private void gameLoop() {
-        if (playerScore > playerLevel * 700) {
+        if (playerScore > playerLevel * 1000) {
             playerLevel++;
             gravity++;
         }
@@ -287,7 +287,7 @@ public class Tetris extends ApplicationAdapter {
         blockSet = true;
         blockCurrent = blockNext.clone();
         blockNext = new TetrisBlock(randBlock.nextInt(7));
-        playerScore += (20 * gravity);
+        playerScore += 25;
     }
 
     private void drawHeading() {
