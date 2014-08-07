@@ -4,7 +4,7 @@
 	<inherits name='com.badlogic.gdx.backends.gdx_backends_gwt' />
 
 	<inherits name='Tetris' />
-	<entry-point class='com.mygdx.game.client.HtmlLauncher' />
+	<entry-point class='com.mygdx.tetris.client.HtmlLauncher' />
 	
-	<moving-configuration-property name="gdx.assetpath" value="../core/assets" />
+	<set-configuration-property name="gdx.assetpath" value="../core/assets" />
 </module>

@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.tetris;
 
 public class TetrisBlock {
     private static final int[][][][] blockStates = {

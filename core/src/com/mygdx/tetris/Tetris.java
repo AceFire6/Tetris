@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.tetris;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -28,7 +28,7 @@ public class Tetris extends ApplicationAdapter {
     private String nextBlockString = "";
     private boolean blockSet = false;
     private Random randBlock = new Random();
-    private int gravity = 1;
+    private double gravity = 1;
     private int gravityModifier = 1;
     private long oldTime;
     private long gravityTime;
@@ -89,7 +89,7 @@ public class Tetris extends ApplicationAdapter {
     private void gameLoop() {
         if (playerScore > playerLevel * 1000) {
             playerLevel++;
-            gravity++;
+            gravity += 0.5;
         }
         if ((System.currentTimeMillis() - oldTime) > 150 && !blockSet) {
             handleInput();
@@ -136,6 +136,7 @@ public class Tetris extends ApplicationAdapter {
                     tetrisGrid[k] = tetrisGrid[k - 1].clone();
                     eraseRow(k - 1);
                 }
+                drawBoard();
             }
         }
         updateBlockPosition();
