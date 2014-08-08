@@ -3,6 +3,7 @@ package com.mygdx.tetris;
 
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.Set;
 
 public class HighScoreTable extends Hashtable<String, Integer> {
 
@@ -13,24 +14,32 @@ public class HighScoreTable extends Hashtable<String, Integer> {
     @Override
     public String toString() {
         String highScoreString = "";
-        while (this.keys().hasMoreElements()) {
-            String currentKey = this.keys().nextElement();
-            highScoreString += currentKey;
-            for (int i = 0; i < (currentKey + this.get(currentKey)).length(); i++) {
-                highScoreString += ".";
+        Set<String> keys = this.keySet();
+        int counter = 0;
+        for (String key : keys) {
+            if (counter < 5) {
+                highScoreString = key + "    " + this.get(key) + "\n" + highScoreString;
+                counter++;
+            } else {
+                break;
             }
-            highScoreString += this.get(currentKey) + "\n";
         }
         return highScoreString;
     }
 
     public String getForFile() {
         String highScoreString = "";
-        while (this.keys().hasMoreElements()) {
-            String currentKey = this.keys().nextElement();
-            highScoreString += currentKey;
-            highScoreString += ":";
-            highScoreString += this.get(currentKey) + "\n";
+        int counter = 0;
+        Set<String> keys = this.keySet();
+        for (String key : keys) {
+            if (counter < 5) {
+                highScoreString += key;
+                highScoreString += ":";
+                highScoreString += this.get(key) + "\n";
+                counter++;
+            } else {
+                break;
+            }
         }
         return highScoreString;
     }
@@ -41,7 +50,7 @@ public class HighScoreTable extends Hashtable<String, Integer> {
         Integer[] values = this.values().toArray(new Integer[this.values().size()]);
 
         Arrays.sort(values);
-        for (int i = 0; i < values.length; i++) {
+        for (int i = values.length - 1; i >= 0; i--) {
             newTable.put(keys[i], values[i]);
         }
         this.clear();
@@ -49,7 +58,6 @@ public class HighScoreTable extends Hashtable<String, Integer> {
     }
 
     public Integer peek() {
-        this.sort();
-        return ((Integer) this.values().toArray()[this.values().toArray().length - 1]);
+        return ((Integer) this.values().toArray()[0]);
     }
 }
