@@ -65,8 +65,7 @@ public class TetrisBlock {
         }
     }
 
-    @Override
-    public TetrisBlock clone() {
+    public TetrisBlock cloneBlock() {
         return new TetrisBlock(this.blockType, this.center.clone(), this.rotationState);
     }
 

@@ -11,13 +11,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import javax.swing.*;
+import java.io.File;
 import java.util.Random;
 
 
 public class Tetris extends ApplicationAdapter {
-	SpriteBatch batch;
-    BitmapFont font;
+	private SpriteBatch batch;
+    private BitmapFont font;
     protected static final int BOARD_HEIGHT = 27;
     protected static final int BOARD_WIDTH = 10;
     protected String[][] tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
@@ -25,6 +25,7 @@ public class Tetris extends ApplicationAdapter {
     private int playerLevel = 1;
     private TetrisBlock blockCurrent = null;
     private TetrisBlock blockNext = null;
+    private TetrisBlock storedBlock = null;
     private String nextBlockString = "";
     private boolean blockSet = false;
     private Random randBlock = new Random();
@@ -34,18 +35,49 @@ public class Tetris extends ApplicationAdapter {
     private long gravityTime;
     private boolean paused = false;
     private boolean startScreen = true;
+    private boolean gameOverScreen = false;
+    private boolean moving = false;
+    private boolean swapped = false;
+    private static Preferences prefs;
+    private static Dictionary<String, Integer> highScores;
 
     @Override
 	public void create() {
+        tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
+        playerScore = 0;
+        playerLevel = 1;
 		batch = new SpriteBatch();
-        FileHandle fontFile = new FileHandle("fonts/novamono/novamono.fnt");
+        FileHandle fontFile = new FileHandle(new File("fonts/novamono/novamono.fnt"));
         font = new BitmapFont(fontFile);
         font.setColor(Color.LIGHT_GRAY);
         fillBoard();
         oldTime = System.currentTimeMillis();
         gravityTime = System.currentTimeMillis();
+        paused = false;
+        startScreen = true;
+        gameOverScreen = false;
+        moving = false;
+        swapped = false;
         assignTetrisBlocks();
 	}
+
+    public void restart() {
+        tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
+        playerScore = 0;
+        playerLevel = 1;
+        fillBoard();
+        oldTime = System.currentTimeMillis();
+        gravityTime = System.currentTimeMillis();
+        paused = false;
+        startScreen = false;
+        gameOverScreen = false;
+        moving = false;
+        swapped = false;
+        blockCurrent = null;
+        blockNext = null;
+        storedBlock = null;
+        assignTetrisBlocks();
+    }
 
     @Override
     public void dispose() {
@@ -78,8 +110,23 @@ public class Tetris extends ApplicationAdapter {
             }
             font.setScale(2f, 2f);
             font.drawMultiLine(batch, "PAUSED\n\nPush Escape to unpause\n\nPush Q to Quit", 0,
-                               Gdx.graphics.getHeight()*0.70F, Gdx.graphics.getWidth(),
-                               HAlignment.CENTER);
+                    Gdx.graphics.getHeight() * 0.70F, Gdx.graphics.getWidth(),
+                    HAlignment.CENTER);
+        } else if (gameOverScreen) {
+            String gameOver = "Game Over!\nYou scored: " + playerScore +
+                              "\n\nPush R to Restart" +
+                              "\n\nPush Q to Quit";
+            font.setScale(2f, 2f);
+            font.drawMultiLine(batch, gameOver, 0, Gdx.graphics.getHeight()*0.70F,
+                               Gdx.graphics.getWidth(), HAlignment.CENTER);
+            if ((System.currentTimeMillis() - oldTime) > 500) {
+                if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+                    System.exit(0);
+                }
+                if (Gdx.input.isKeyPressed(Input.Keys.R)) {
+                    restart();
+                }
+            }
         } else {
             gameLoop();
         }
@@ -87,18 +134,21 @@ public class Tetris extends ApplicationAdapter {
 	}
 
     private void gameLoop() {
+        if ((System.currentTimeMillis() - gravityTime) > (800 / (gravity * gravityModifier)) &&
+                !moving) {
+            doGravity();
+        }
         if (playerScore > playerLevel * 1000) {
             playerLevel++;
-            gravity += 0.5;
+            gravity += 0.25;
         }
         if ((System.currentTimeMillis() - oldTime) > 150 && !blockSet) {
             handleInput();
         }
         if (blockSet) {
             if (tetrisGrid[2][4].equals("[]")) {
-                JOptionPane.showMessageDialog(null, "Game Over!\nYou scored: " + playerScore);
+                gameOverScreen = true;
                 //TODO Have highscore logic here
-                System.exit(0);
             }
             blockSet = false;
             checkCompleteRows();
@@ -106,10 +156,6 @@ public class Tetris extends ApplicationAdapter {
         drawHeading();
         drawBoard();
         drawUI();
-        if ((System.currentTimeMillis() - gravityTime) > (800 / (gravity * gravityModifier)) &&
-            !blockSet) {
-            doGravity();
-        }
     }
 
     private void hardDrop() {
@@ -123,7 +169,7 @@ public class Tetris extends ApplicationAdapter {
         clearCurrentBlock();
         int rowsRemoved = 0;
         for (int i = BOARD_HEIGHT - 1; i > 0; i--) {
-            if (checkFull(tetrisGrid[i].clone())) {
+            if (checkFullRow(tetrisGrid[i].clone())) {
                 eraseRow(i);
                 rowsRemoved++;
                 playerScore += (50 * rowsRemoved);
@@ -132,7 +178,7 @@ public class Tetris extends ApplicationAdapter {
 
         for (int i = 0; i < rowsRemoved; i++) {
             for (int k = BOARD_HEIGHT - 1; k > 0; k--) {
-                if (checkEmpty(tetrisGrid[k].clone())) {
+                if (checkEmptyRow(tetrisGrid[k].clone())) {
                     tetrisGrid[k] = tetrisGrid[k - 1].clone();
                     eraseRow(k - 1);
                 }
@@ -142,7 +188,7 @@ public class Tetris extends ApplicationAdapter {
         updateBlockPosition();
     }
 
-    private boolean checkFull(String[] row) {
+    private boolean checkFullRow(String[] row) {
         for (String rowItem: row) {
             if (!rowItem.equals("[]")) {
                 return false;
@@ -151,7 +197,7 @@ public class Tetris extends ApplicationAdapter {
         return true;
     }
 
-    private boolean checkEmpty(String[] row) {
+    private boolean checkEmptyRow(String[] row) {
         for (String rowItem: row) {
             if (rowItem.equals("[]") || rowItem.equals("==")) {
                 return false;
@@ -165,17 +211,26 @@ public class Tetris extends ApplicationAdapter {
             doRotate();
             oldTime = System.currentTimeMillis();
         }
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && !swapped) {
+            swapped = true;
+            storeBlock();
+            oldTime = System.currentTimeMillis();
+        }
         if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             gravityModifier = 10;
         } else {
             gravityModifier = 1;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            moving = true;
             moveBlockLeft();
+            moving = false;
             oldTime = System.currentTimeMillis();
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            moving = true;
             moveBlockRight();
+            moving = false;
             oldTime = System.currentTimeMillis();
         }
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
@@ -189,14 +244,31 @@ public class Tetris extends ApplicationAdapter {
 
     }
 
+    private void storeBlock() {
+        clearCurrentBlock();
+        if (storedBlock == null) {
+            storedBlock = blockCurrent.cloneBlock();
+            storedBlock.setCenter(new int[] {2, 4});
+            blockCurrent = blockNext.cloneBlock();
+            blockNext = new TetrisBlock(randBlock.nextInt(7));
+        } else {
+            TetrisBlock temp = blockCurrent.cloneBlock();
+            blockCurrent = storedBlock.cloneBlock();
+            blockCurrent.setCenter(new int[] {2, 4});
+            storedBlock = temp.cloneBlock();
+            storedBlock.setCenter(new int[] {2, 4});
+        }
+        updateBlockPosition();
+    }
+
     private boolean canRotate() {
         int[][] nextRotation = blockCurrent.getNextRotation();
-        for (int i = 0; i < nextRotation.length; i++) {
+        for (int[] nextRotationCoord: nextRotation) {
             try {
-                if (nextRotation[i][0] < 0 || nextRotation[i][0] > BOARD_HEIGHT ||
-                        nextRotation[i][1] < 0 || nextRotation[i][1] > BOARD_WIDTH ||
-                        tetrisGrid[nextRotation[i][0]][nextRotation[i][1]].equals("[]") ||
-                        tetrisGrid[nextRotation[i][0]][nextRotation[i][1]].equals("==")) {
+                if (nextRotationCoord[0] < 0 || nextRotationCoord[0] > BOARD_HEIGHT ||
+                        nextRotationCoord[1] < 0 || nextRotationCoord[1] > BOARD_WIDTH ||
+                        tetrisGrid[nextRotationCoord[0]][nextRotationCoord[1]].equals("[]") ||
+                        tetrisGrid[nextRotationCoord[0]][nextRotationCoord[1]].equals("==")) {
                     return false;
                 }
             } catch (Exception e) {
@@ -250,7 +322,8 @@ public class Tetris extends ApplicationAdapter {
                 return;
             }
         }
-        updateBlockPosition(new int[] {blockCurrent.getCenter()[0], blockCurrent.getCenter()[1] - 1});
+        updateBlockPosition(new int[] {blockCurrent.getCenter()[0],
+                            blockCurrent.getCenter()[1] - 1});
     }
 
     private void moveBlockRight() {
@@ -267,28 +340,33 @@ public class Tetris extends ApplicationAdapter {
                 return;
             }
         }
-        updateBlockPosition(new int[] {blockCurrent.getCenter()[0], blockCurrent.getCenter()[1] + 1});
+        updateBlockPosition(new int[] {blockCurrent.getCenter()[0],
+                            blockCurrent.getCenter()[1] + 1});
     }
 
     private void doGravity() {
-        clearCurrentBlock();
-        for (int[] block: blockCurrent.getBlockArray()) {
-            if (tetrisGrid[block[0] + 1][block[1]].equals("[]") ||
-                tetrisGrid[block[0] + 1][block[1]].equals("==") || blockSet) {
-                updateBlockPosition();
-                setBlock();
-                return;
+        if (!moving) {
+            clearCurrentBlock();
+            for (int[] block : blockCurrent.getBlockArray()) {
+                if (tetrisGrid[block[0] + 1][block[1]].equals("[]") ||
+                        tetrisGrid[block[0] + 1][block[1]].equals("==") || blockSet) {
+                    updateBlockPosition();
+                    setBlock();
+                    return;
+                }
             }
+            updateBlockPosition(new int[] {blockCurrent.getCenter()[0] + 1,
+                                blockCurrent.getCenter()[1]});
         }
-        updateBlockPosition(new int[] {blockCurrent.getCenter()[0] + 1, blockCurrent.getCenter()[1]});
         gravityTime = System.currentTimeMillis();
     }
 
     private void setBlock() {
         blockSet = true;
-        blockCurrent = blockNext.clone();
+        blockCurrent = blockNext.cloneBlock();
         blockNext = new TetrisBlock(randBlock.nextInt(7));
         playerScore += 25;
+        swapped = false;
     }
 
     private void drawHeading() {
@@ -319,9 +397,13 @@ public class Tetris extends ApplicationAdapter {
 
     private void drawUI() {
         int LEFTMOST_BORDER = 500;
+        String storedBlockString = "";
 
         if (!nextBlockString.equals("") || ! blockNext.toString().equals(nextBlockString)) {
             nextBlockString = blockNext.toString();
+        }
+        if (storedBlock != null) {
+            storedBlockString = storedBlock.toString();
         }
 
         String score = "Score: " + playerScore;
@@ -333,6 +415,10 @@ public class Tetris extends ApplicationAdapter {
         String nextPiece = "Next Piece:";
         font.drawMultiLine(batch, nextPiece, LEFTMOST_BORDER, 675);
         font.drawMultiLine(batch, nextBlockString, LEFTMOST_BORDER + 50, 625);
+
+        String storedPiece = "Stored Piece:";
+        font.drawMultiLine(batch, storedPiece, LEFTMOST_BORDER, 525);
+        font.drawMultiLine(batch, storedBlockString, LEFTMOST_BORDER + 50, 475);
     }
 
     private void fillBoard() {
