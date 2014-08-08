@@ -3,6 +3,7 @@ package com.mygdx.tetris;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -39,10 +40,13 @@ public class Tetris extends ApplicationAdapter {
     private boolean moving = false;
     private boolean swapped = false;
     private static Preferences prefs;
-    private static Dictionary<String, Integer> highScores;
+    private static HighScoreTable highScores;
+    private int smallestHighScore;
+    private String playerName;
 
     @Override
 	public void create() {
+        getPreferences();
         tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
         playerScore = 0;
         playerLevel = 1;
@@ -62,6 +66,9 @@ public class Tetris extends ApplicationAdapter {
 	}
 
     public void restart() {
+        prefs.putString("highscores", highScores.toString());
+        prefs.flush();
+        getPreferences();
         tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
         playerScore = 0;
         playerLevel = 1;
@@ -85,6 +92,34 @@ public class Tetris extends ApplicationAdapter {
         font.dispose();
     }
 
+    private void exit() {
+        prefs.putString("highscores", highScores.toString());
+        prefs.flush();
+        dispose();
+        System.exit(0);
+    }
+
+    private void getPreferences() {
+        prefs = Gdx.app.getPreferences("Tetris");
+        if (prefs.contains("highscores")) {
+            String highScoresList = prefs.getString("highscores");
+            for (String highscore: highScoresList.split("\n")) {
+                if (highscore.split(":").length == 2) {
+                    highScores.put(highscore.split(":")[0], Integer.parseInt(highscore.split(":")[1]));
+                } else {
+                    highScores = new HighScoreTable();
+                    smallestHighScore = 0;
+                    return;
+                }
+            }
+            highScores.sort();
+            smallestHighScore = highScores.peek();
+        } else {
+            highScores = new HighScoreTable();
+            smallestHighScore = 0;
+        }
+    }
+
     @Override
 	public void render() {
         Gdx.gl.glClearColor(0.25f, 0.25f, 0.25f, 1);
@@ -105,7 +140,7 @@ public class Tetris extends ApplicationAdapter {
                     oldTime = System.currentTimeMillis();
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    System.exit(0);
+                    exit();
                 }
             }
             font.setScale(2f, 2f);
@@ -121,7 +156,7 @@ public class Tetris extends ApplicationAdapter {
                                Gdx.graphics.getWidth(), HAlignment.CENTER);
             if ((System.currentTimeMillis() - oldTime) > 500) {
                 if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    System.exit(0);
+                    exit();
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.R)) {
                     restart();
@@ -147,8 +182,11 @@ public class Tetris extends ApplicationAdapter {
         }
         if (blockSet) {
             if (tetrisGrid[2][4].equals("[]")) {
+                if (playerScore > smallestHighScore) {
+                    HighScoreInputListener listener = new HighScoreInputListener();
+                    Gdx.input.getTextInput(listener, "You've got a high score!", playerName);
+                }
                 gameOverScreen = true;
-                //TODO Have highscore logic here
             }
             blockSet = false;
             checkCompleteRows();
@@ -175,7 +213,7 @@ public class Tetris extends ApplicationAdapter {
                 playerScore += (50 * rowsRemoved);
             }
         }
-
+        drawBoard();
         for (int i = 0; i < rowsRemoved; i++) {
             for (int k = BOARD_HEIGHT - 1; k > 0; k--) {
                 if (checkEmptyRow(tetrisGrid[k].clone())) {
@@ -355,9 +393,10 @@ public class Tetris extends ApplicationAdapter {
                     return;
                 }
             }
-            updateBlockPosition(new int[] {blockCurrent.getCenter()[0] + 1,
-                                blockCurrent.getCenter()[1]});
         }
+        updateBlockPosition(new int[] {blockCurrent.getCenter()[0] + 1,
+                            blockCurrent.getCenter()[1]});
+
         gravityTime = System.currentTimeMillis();
     }
 
@@ -372,7 +411,7 @@ public class Tetris extends ApplicationAdapter {
     private void drawHeading() {
         font.setScale(2f, 2f);
         font.drawMultiLine(batch, "TETRIS", 0, Gdx.graphics.getHeight() - 20,
-                           Gdx.graphics.getWidth()*0.60F, HAlignment.CENTER);
+                Gdx.graphics.getWidth() * 0.60F, HAlignment.CENTER);
     }
 
     private TextBounds drawWelcome() {
@@ -419,6 +458,10 @@ public class Tetris extends ApplicationAdapter {
         String storedPiece = "Stored Piece:";
         font.drawMultiLine(batch, storedPiece, LEFTMOST_BORDER, 525);
         font.drawMultiLine(batch, storedBlockString, LEFTMOST_BORDER + 50, 475);
+
+        String highScore = "High Scores:";
+        font.drawMultiLine(batch, highScore, LEFTMOST_BORDER, 375);
+        font.drawMultiLine(batch, highScores.toString(), LEFTMOST_BORDER + 50, 300);
     }
 
     private void fillBoard() {
@@ -457,5 +500,18 @@ public class Tetris extends ApplicationAdapter {
     private void assignTetrisBlocks() {
         blockNext = new TetrisBlock(randBlock.nextInt(7));
         blockCurrent = new TetrisBlock(randBlock.nextInt(7));
+    }
+
+    public class HighScoreInputListener implements Input.TextInputListener {
+        @Override
+        public void input (String text) {
+            addToHighScores(text);
+        }
+
+        @Override
+        public void canceled () {
+            playerName = "Anon";
+            addToHighScores(playerName);
+        }
     }
 }
