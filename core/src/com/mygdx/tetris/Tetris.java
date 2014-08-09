@@ -196,7 +196,6 @@ public class Tetris extends ApplicationAdapter {
                         highScores.put(highscore.split(":")[0], Integer.parseInt(highscore.split
                                 (":")[1]));
                     } catch (NullPointerException npe) {
-                        npe.printStackTrace();
                         prefs.clear();
                         getPreferences();
                         return;
