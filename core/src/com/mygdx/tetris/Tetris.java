@@ -47,6 +47,7 @@ public class Tetris extends ApplicationAdapter {
 
     @Override
     public void create() {
+        highScores = new HighScoreTable();
         getPreferences();
         tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
         playerScore = 0;
@@ -196,6 +197,7 @@ public class Tetris extends ApplicationAdapter {
                         highScores.put(highscore.split(":")[0], Integer.parseInt(highscore.split
                                 (":")[1]));
                     } catch (NullPointerException npe) {
+                        npe.printStackTrace();
                         prefs.clear();
                         getPreferences();
                         return;
@@ -235,7 +237,8 @@ public class Tetris extends ApplicationAdapter {
 
         if (blockSet) {
             if (tetrisGrid[2][4].equals("[]")) {
-                if (playerScore > smallestHighScore) {
+                smallestHighScore = highScores.peek();
+                if (playerScore > smallestHighScore || highScores.size() < 5) {
                     HighScoreInputListener listener = new HighScoreInputListener();
                     Gdx.input.getTextInput(listener, "You've got a high score!", playerName);
                 }
@@ -528,7 +531,7 @@ public class Tetris extends ApplicationAdapter {
 
         String highScore = "High Scores:";
         font.drawMultiLine(batch, highScore, LEFTMOST_BORDER, 375);
-        font.drawMultiLine(batch, highScores.toString(), LEFTMOST_BORDER, 300);
+        font.drawMultiLine(batch, highScores.toString(), LEFTMOST_BORDER, 325);
     }
 
     private void fillBoard() {
