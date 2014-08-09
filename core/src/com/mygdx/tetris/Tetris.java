@@ -234,7 +234,7 @@ public class Tetris extends ApplicationAdapter {
         handleInput();
 
         if (blockSet) {
-            if (tetrisGrid[2][4].equals("[]")) {
+            if (isCollision(0, 0)) {
                 smallestHighScore = highScores.peek();
                 if (playerScore > smallestHighScore || highScores.size() < 5) {
                     HighScoreInputListener listener = new HighScoreInputListener();
@@ -402,19 +402,10 @@ public class Tetris extends ApplicationAdapter {
 
     private void moveBlockLeft() {
         clearCurrentBlock();
-        for (int[] block : blockCurrent.getBlockArray()) {
-            try {
-                int[] center = blockCurrent.getCenter().clone();
-                if (tetrisGrid[block[0]][block[1] - 1].equals("[]") ||
-                    tetrisGrid[center[0]][center[1] - 1].equals("[]") ||
-                    tetrisGrid[block[0]][block[1] - 1].equals("==")) {
-                    updateBlockPosition();
-                    return;
-                }
-            } catch (Exception e) {
-                updateBlockPosition();
-                return;
-            }
+
+        if (isCollision(0, - 1)) {
+            updateBlockPosition();
+            return;
         }
         updateBlockPosition(new int[] {blockCurrent.getCenter()[0],
                                        blockCurrent.getCenter()[1] - 1});
@@ -422,19 +413,10 @@ public class Tetris extends ApplicationAdapter {
 
     private void moveBlockRight() {
         clearCurrentBlock();
-        for (int[] block : blockCurrent.getBlockArray()) {
-            try {
-                int[] center = blockCurrent.getCenter().clone();
-                if (tetrisGrid[block[0]][block[1] + 1].equals("[]") ||
-                    tetrisGrid[center[0]][center[1] + 1].equals("[]") ||
-                    tetrisGrid[block[0]][block[1] + 1].equals("==")) {
-                    updateBlockPosition();
-                    return;
-                }
-            } catch (Exception e) {
-                updateBlockPosition();
-                return;
-            }
+
+        if (isCollision(0, 1)) {
+            updateBlockPosition();
+            return;
         }
         updateBlockPosition(new int[] {blockCurrent.getCenter()[0],
                                        blockCurrent.getCenter()[1] + 1});
@@ -442,24 +424,33 @@ public class Tetris extends ApplicationAdapter {
 
     private void doGravity() {
         clearCurrentBlock();
-        int[] center = blockCurrent.getCenter().clone();
-        if (tetrisGrid[center[0] + 1][center[1]].equals("[]") ||
-            tetrisGrid[center[0] + 1][center[1]].equals("==")) {
+        if (isCollision(1, 0)) {
             updateBlockPosition();
             setBlock();
             return;
         }
-        for (int[] block : blockCurrent.getBlockArray()) {
-            if (tetrisGrid[block[0] + 1][block[1]].equals("[]") ||
-                tetrisGrid[block[0] + 1][block[1]].equals("==")) {
-                updateBlockPosition();
-                setBlock();
-                return;
-            }
-        }
         updateBlockPosition(new int[] {blockCurrent.getCenter()[0] + 1,
                                        blockCurrent.getCenter()[1]});
         gravityTime = System.currentTimeMillis();
+    }
+
+    private boolean isCollision(int xOffset, int yOffset) {
+        int[] center = blockCurrent.getCenter().clone();
+        try {
+            if (tetrisGrid[center[0] + xOffset][center[1] + yOffset].equals("[]") ||
+                tetrisGrid[center[0] + xOffset][center[1] + yOffset].equals("==")) {
+                return true;
+            }
+            for (int[] block : blockCurrent.getBlockArray()) {
+                if (tetrisGrid[block[0] + xOffset][block[1] + yOffset].equals("[]") ||
+                    tetrisGrid[block[0] + xOffset][block[1] + yOffset].equals("==")) {
+                    return true;
+                }
+            }
+        } catch (ArrayIndexOutOfBoundsException ae) {
+            return true;
+        }
+        return false;
     }
 
     private void setBlock() {
