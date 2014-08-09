@@ -183,8 +183,7 @@ public class Tetris extends ApplicationAdapter {
     private void exit() {
         prefs.putString("highscores", highScores.getForFile());
         prefs.flush();
-        dispose();
-        System.exit(0);
+        Gdx.app.exit();
     }
 
     private void getPreferences() {
