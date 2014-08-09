@@ -1,9 +1,6 @@
 package com.mygdx.tetris;
 
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -12,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
-import java.io.File;
 import java.util.Random;
 
 
@@ -53,7 +49,7 @@ public class Tetris extends ApplicationAdapter {
         playerScore = 0;
         playerLevel = 1;
         batch = new SpriteBatch();
-        FileHandle fontFile = new FileHandle(new File("fonts/novamono/novamono.fnt"));
+        FileHandle fontFile = Gdx.files.getFileHandle("font/novamono.fnt", Files.FileType.Local);
         font = new BitmapFont(fontFile);
         font.setColor(Color.LIGHT_GRAY);
         fillBoard();

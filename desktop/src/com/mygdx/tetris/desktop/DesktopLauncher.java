@@ -11,7 +11,7 @@ public class DesktopLauncher {
         config.width = 800;
         config.height = 800;
         config.resizable = false;
-        config.addIcon("icon.png", Files.FileType.Internal);
+        config.addIcon("icon/icon.png", Files.FileType.Local);
 		new LwjglApplication(new Tetris(), config);
 	}
 }
