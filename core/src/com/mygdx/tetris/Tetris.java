@@ -166,6 +166,7 @@ public class Tetris extends ApplicationAdapter {
         movementTimer = System.currentTimeMillis();
         gravityTime = System.currentTimeMillis();
         gravityModifier = 1;
+        gravity = 1;
         paused = false;
         startScreen = false;
         controlsScreen = false;
