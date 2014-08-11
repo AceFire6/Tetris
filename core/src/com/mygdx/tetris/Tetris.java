@@ -82,6 +82,11 @@ public class Tetris extends ApplicationAdapter {
                     startScreen = false;
                     controlsScreen = true;
                 }
+                if (Gdx.input.isKeyPressed(Input.Keys.C)) {
+                    highScores = new HighScoreTable();
+                    prefs.clear();
+                    prefs.flush();
+                }
                 if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
                     exit();
                 }
@@ -480,6 +485,7 @@ public class Tetris extends ApplicationAdapter {
                              "This is tetris.\n\n" +
                              "Press Enter to start.\n\n" +
                              "Press H to see the controls.\n\n" +
+                             "Press C to clear the high scores.\n\n" +
                              "Push Q to Quit";
         TextBounds welcomeBounds = font.getMultiLineBounds(welcomeText);
         font.drawMultiLine(batch, welcomeText, 0, Gdx.graphics.getHeight() -
