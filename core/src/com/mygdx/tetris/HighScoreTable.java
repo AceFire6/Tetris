@@ -14,8 +14,8 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
         Set<String> keys = sortByValue((HighScoreTable)this.clone()).keySet();
         int counter = 0;
         for (String key : keys) {
-            highScoreString += key;
             if (counter < 5) {
+                highScoreString += key;
                 if (key.length() < 5) {
                     for (int i = 0; i < 6 - key.length(); i++) {
                         highScoreString += " ";
@@ -43,9 +43,7 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
 
     public Integer peek() {
         if (size() > 0) {
-            System.out.println(sortByValue(this).values().toArray()[size() - 1]);
-            System.out.println(sortByValue(this).values().toArray()[0]);
-            return ((Integer) sortByValue(this).values().toArray()[0]);
+            return ((Integer) sortByValue(this).values().toArray()[size() - 1]);
         } else {
             return 0;
         }
