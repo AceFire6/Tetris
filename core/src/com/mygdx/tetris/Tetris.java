@@ -164,8 +164,6 @@ public class Tetris extends ApplicationAdapter {
         playerScore = 0;
         playerLevel = 1;
         fillBoard();
-        movementTimer = System.currentTimeMillis();
-        gravityTime = System.currentTimeMillis();
         gravityModifier = 1;
         gravity = 1;
         paused = false;
@@ -177,6 +175,9 @@ public class Tetris extends ApplicationAdapter {
         blockNext = null;
         storedBlock = null;
         assignTetrisBlocks();
+        movementTimer = System.currentTimeMillis();
+        functionTimer = System.currentTimeMillis();
+        gravityTime = System.currentTimeMillis();
     }
 
     private void exit() {
@@ -246,7 +247,7 @@ public class Tetris extends ApplicationAdapter {
     }
 
     private void hardDrop() {
-        while (! blockSet) {
+        while (!blockSet) {
             doGravity();
             playerScore += 1;
         }
