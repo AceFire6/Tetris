@@ -24,14 +24,25 @@ To run it, change to the above directory and run: `java -jar desktop-1.0.jar`
 
 ## Controls
 
+### Main Menu:
+
+|Key            | Description|
+|:--------------|:------------|
+|`ENTER`        | Start the game.|
+|`H`            | Displays the controls|
+|`C`            | Clear the highscore list (On the Intro Screen)|
+|`Q`            | Quits the game.|
+
+
+### In-game:
+
 |Key            | Description|
 |:--------------|:------------|
 |`SPACE`        | Drop the currently controlled block.|
-|`LEFT SHIFT`   | Store the currently active block and replace it with the next block. (Can only be done          once per block)|
+|`LEFT SHIFT`   | Store the currently active block and replace it with the next block. (Can only be done once per block)|
 |`UP ARROW`     | Rotate the currently active block 90<sup>o</sup> clockwise.|
 |`RIGHT ARROW`  | Move the currently active block one space to the right.|
 |`LEFT ARROW`   | Move the currently active block one space to the left.|
 |`ESCAPE`       | Pause the game. Push again to unpause.|
-|`Q`            | Quits the game. (After pausing and on the Game Over screen)|
-|`R`            | Restart the game. (On the Game Over screen)|
-|`ENTER`        | Start the game. (On the Intro screen)|
+|`R`            | Restart the game.|
+|`Q`            | Quits the game.|
