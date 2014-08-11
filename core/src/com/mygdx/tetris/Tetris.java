@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
+import java.util.Date;
 import java.util.Random;
 
 
@@ -214,7 +215,7 @@ public class Tetris extends ApplicationAdapter {
     }
 
     private void addToHighScores(String name) {
-        highScores.put(name, playerScore);
+        highScores.addScore(name, playerScore, new Date());
     }
 
     private void gameLoop() {
@@ -566,9 +567,9 @@ public class Tetris extends ApplicationAdapter {
         @Override
         public void input(String text) {
             if (text.length() <= 6) {
-                addToHighScores(text);
+                highScores.addScore(text, playerScore, new Date());
             } else {
-                addToHighScores(text.substring(0, 5));
+                highScores.addScore(text.substring(0, 5), playerScore, new Date());
             }
         }
 

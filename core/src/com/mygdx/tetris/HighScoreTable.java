@@ -9,19 +9,26 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
         super();
     }
 
+    public void addScore(String name, int playscore, Date date) {
+        GregorianCalendar dateCal = new GregorianCalendar();
+        dateCal.setTime(date);
+        if (name.length() < 5) {
+            for (int i = 0; i < 5 - name.length(); i++) {
+                name += " ";
+            }
+        }
+        name += "  "  + dateCal.get(Calendar.DAY_OF_MONTH) + "/" + dateCal.get(Calendar.MONTH) +
+                "/" + dateCal.get(Calendar.YEAR);
+        put(name, playscore);
+    }
+
     public String getAsString() {
         String highScoreString = "";
-        Set<String> keys = sortByValue((HighScoreTable)this.clone()).keySet();
+        Set<String> keys = sortByValue((HighScoreTable) this.clone()).keySet();
         int counter = 0;
         for (String key : keys) {
             if (counter < 5) {
-                highScoreString += key;
-                if (key.length() < 5) {
-                    for (int i = 0; i < 5 - key.length(); i++) {
-                        highScoreString += " ";
-                    }
-                }
-                highScoreString += "   " + this.get(key) + "\n";
+                highScoreString += key + "  " + this.get(key) + "\n";
                 counter++;
             } else {
                 break;
