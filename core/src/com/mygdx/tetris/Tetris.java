@@ -502,7 +502,7 @@ public class Tetris extends ApplicationAdapter {
     }
 
     private void drawUI() {
-        int LEFTMOST_BORDER = 500;
+        int LEFTMOST_BORDER = 475;
         String storedBlockString = "";
 
         if (! nextBlockString.equals("") || ! blockNext.toString().equals(nextBlockString)) {
@@ -528,6 +528,7 @@ public class Tetris extends ApplicationAdapter {
 
         String highScore = "High Scores:";
         font.drawMultiLine(batch, highScore, LEFTMOST_BORDER, 375);
+        font.setScale(0.8F);
         font.drawMultiLine(batch, highScores.getAsString(), LEFTMOST_BORDER, 325);
     }
 
