@@ -573,6 +573,9 @@ public class Tetris extends ApplicationAdapter {
     public class HighScoreInputListener implements Input.TextInputListener {
         @Override
         public void input(String text) {
+            text = text.replaceAll(" ", "");
+            text = text.replaceAll(":", "");
+            text = text.replaceAll("\n", "");
             if (text.length() <= 6) {
                 highScores.addScore(text, playerScore, new Date());
             } else {
