@@ -9,8 +9,7 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
         super();
     }
 
-    @Override
-    public String toString() {
+    public String getAsString() {
         sort();
         String highScoreString = "";
         Set<String> keys = this.keySet();
@@ -35,17 +34,11 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
     public String getForFile() {
         sort();
         String highScoreString = "";
-        int counter = 0;
         Set<String> keys = this.keySet();
         for (String key : keys) {
-            if (counter < 5) {
-                highScoreString += key;
-                highScoreString += ":";
-                highScoreString += this.get(key) + "\n";
-                counter++;
-            } else {
-                break;
-            }
+            highScoreString += key;
+            highScoreString += ":";
+            highScoreString += this.get(key) + "\n";
         }
         return highScoreString;
     }
@@ -57,6 +50,7 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
     }
 
     public Integer peek() {
+        sort();
         if (size() > 0) {
             return ((Integer) sortByValue(this).values().toArray()[size() - 1]);
         } else {

@@ -213,6 +213,7 @@ public class Tetris extends ApplicationAdapter {
 
     private void addToHighScores(String name) {
         highScores.put(name, playerScore);
+        highScores.sort();
     }
 
     private void gameLoop() {
@@ -517,7 +518,7 @@ public class Tetris extends ApplicationAdapter {
 
         String highScore = "High Scores:";
         font.drawMultiLine(batch, highScore, LEFTMOST_BORDER, 375);
-        font.drawMultiLine(batch, highScores.toString(), LEFTMOST_BORDER, 325);
+        font.drawMultiLine(batch, highScores.getAsString(), LEFTMOST_BORDER, 325);
     }
 
     private void fillBoard() {
