@@ -76,9 +76,9 @@ public class TetrisBlock {
     public String toString() {
         String blockString = "";
         String blockGrid[][] = new String[4][4];
-        blockGrid[1][1] = "[]";
+        blockGrid[1][1] = "[[]";
         for (int[] blockCoords : blockStates[blockType][rotationState]) {
-            blockGrid[1 + blockCoords[0]][1 + blockCoords[1]] = "[]";
+            blockGrid[1 + blockCoords[0]][1 + blockCoords[1]] = "[[]";
         }
 
         for (String[] blockRow : blockGrid) {
