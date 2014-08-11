@@ -17,7 +17,7 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
             if (counter < 5) {
                 highScoreString += key;
                 if (key.length() < 5) {
-                    for (int i = 0; i < 6 - key.length(); i++) {
+                    for (int i = 0; i < 5 - key.length(); i++) {
                         highScoreString += " ";
                     }
                 }
