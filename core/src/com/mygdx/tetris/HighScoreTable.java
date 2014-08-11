@@ -10,19 +10,18 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
     }
 
     public String getAsString() {
-        sort();
         String highScoreString = "";
-        Set<String> keys = this.keySet();
+        Set<String> keys = sortByValue((HighScoreTable)this.clone()).keySet();
         int counter = 0;
         for (String key : keys) {
-            String temp = key;
+            highScoreString += key;
             if (counter < 5) {
                 if (key.length() < 5) {
                     for (int i = 0; i < 6 - key.length(); i++) {
-                        temp += " ";
+                        highScoreString += " ";
                     }
                 }
-                highScoreString = temp + "    " + this.get(key) + "\n" + highScoreString;
+                highScoreString += "   " + this.get(key) + "\n";
                 counter++;
             } else {
                 break;
@@ -32,7 +31,6 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
     }
 
     public String getForFile() {
-        sort();
         String highScoreString = "";
         Set<String> keys = this.keySet();
         for (String key : keys) {
@@ -43,16 +41,11 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
         return highScoreString;
     }
 
-    public void sort() {
-        HighScoreTable temp = sortByValue(((HighScoreTable) this.clone()));
-        this.clear();
-        putAll(temp);
-    }
-
     public Integer peek() {
-        sort();
         if (size() > 0) {
-            return ((Integer) sortByValue(this).values().toArray()[size() - 1]);
+            System.out.println(sortByValue(this).values().toArray()[size() - 1]);
+            System.out.println(sortByValue(this).values().toArray()[0]);
+            return ((Integer) sortByValue(this).values().toArray()[0]);
         } else {
             return 0;
         }
@@ -67,7 +60,7 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
         Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
             @Override
             public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                return (o1.getValue()).compareTo(o2.getValue());
+                return (o2.getValue()).compareTo(o1.getValue());
             }
         });
 

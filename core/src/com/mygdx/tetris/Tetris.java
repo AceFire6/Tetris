@@ -203,7 +203,6 @@ public class Tetris extends ApplicationAdapter {
                     return;
                 }
             }
-            highScores.sort();
             smallestHighScore = highScores.peek();
         } else {
             highScores = new HighScoreTable();
@@ -213,7 +212,6 @@ public class Tetris extends ApplicationAdapter {
 
     private void addToHighScores(String name) {
         highScores.put(name, playerScore);
-        highScores.sort();
     }
 
     private void gameLoop() {
@@ -562,7 +560,11 @@ public class Tetris extends ApplicationAdapter {
     public class HighScoreInputListener implements Input.TextInputListener {
         @Override
         public void input(String text) {
-            addToHighScores(text);
+            if (text.length() <= 6) {
+                addToHighScores(text);
+            } else {
+                addToHighScores(text.substring(0, 5));
+            }
         }
 
         @Override
