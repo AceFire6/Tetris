@@ -278,7 +278,7 @@ public class Tetris extends ApplicationAdapter {
 
     private boolean checkFullRow(String[] row) {
         for (String rowItem : row) {
-            if (! rowItem.equals("[[]")) {
+            if (! rowItem.contains("[[]")) {
                 return false;
             }
         }
@@ -287,7 +287,7 @@ public class Tetris extends ApplicationAdapter {
 
     private boolean checkEmptyRow(String[] row) {
         for (String rowItem : row) {
-            if (rowItem.equals("[[]") || rowItem.equals("==")) {
+            if (rowItem.contains("[[]") || rowItem.equals("==")) {
                 return false;
             }
         }
@@ -358,7 +358,7 @@ public class Tetris extends ApplicationAdapter {
             try {
                 if (nextRotationCoord[0] < 0 || nextRotationCoord[0] > BOARD_HEIGHT ||
                     nextRotationCoord[1] < 0 || nextRotationCoord[1] > BOARD_WIDTH ||
-                    tetrisGrid[nextRotationCoord[0]][nextRotationCoord[1]].equals("[[]") ||
+                    tetrisGrid[nextRotationCoord[0]][nextRotationCoord[1]].contains("[[]") ||
                     tetrisGrid[nextRotationCoord[0]][nextRotationCoord[1]].equals("==")) {
                     return false;
                 }
@@ -379,9 +379,11 @@ public class Tetris extends ApplicationAdapter {
 
     private void updateBlockPosition() {
         for (int[] blockCoords : blockCurrent.getBlockArray()) {
-            tetrisGrid[blockCoords[0]][blockCoords[1]] = "[[]";
+            tetrisGrid[blockCoords[0]][blockCoords[1]] = "[#" + blockCurrent.getBlockColour() +
+                                                         "]" + "[[]" + "[]";
         }
-        tetrisGrid[blockCurrent.getCenter()[0]][blockCurrent.getCenter()[1]] = "[[]";
+        tetrisGrid[blockCurrent.getCenter()[0]][blockCurrent.getCenter()[1]]
+                = "[#" + blockCurrent.getBlockColour() + "]" + "[[]" + "[]";
         if (! blockCurrent.isPlaced()) {
             blockCurrent.place();
         }
@@ -436,12 +438,12 @@ public class Tetris extends ApplicationAdapter {
     private boolean isCollision(int xOffset, int yOffset) {
         int[] center = blockCurrent.getCenter().clone();
         try {
-            if (tetrisGrid[center[0] + xOffset][center[1] + yOffset].equals("[[]") ||
+            if (tetrisGrid[center[0] + xOffset][center[1] + yOffset].contains("[[]") ||
                 tetrisGrid[center[0] + xOffset][center[1] + yOffset].equals("==")) {
                 return true;
             }
             for (int[] block : blockCurrent.getBlockArray()) {
-                if (tetrisGrid[block[0] + xOffset][block[1] + yOffset].equals("[[]") ||
+                if (tetrisGrid[block[0] + xOffset][block[1] + yOffset].contains("[[]") ||
                     tetrisGrid[block[0] + xOffset][block[1] + yOffset].equals("==")) {
                     return true;
                 }

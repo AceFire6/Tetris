@@ -1,5 +1,8 @@
 package com.mygdx.tetris;
 
+import com.badlogic.gdx.graphics.Color;
+
+
 public class TetrisBlock {
     private static final int[][][][] blockStates =
             {{{{- 1, 0}, {1, 0}, {2, 0}}, {{0, - 1}, {0, 1}, {0, 2}}}, //i //0
@@ -13,18 +16,29 @@ public class TetrisBlock {
              {{{- 1, 0}, {1, 0}, {0, 1}}, {{0, - 1}, {1, 0}, {0, 1}}, {{- 1, 0}, {1, 0}, {0, - 1}},
               {{0, - 1}, {- 1, 0}, {0, 1}}},  //t //6
             };
+
+    private static final Color[]  blockColours = {new Color(0.35F, 0.47F, 0.98F, 1F), Color.CYAN,
+                                                  Color.GREEN,
+                                                  Color.MAGENTA, new Color(1F, 0.39F, 0.13F, 1F),
+                                                  Color.YELLOW,
+                                                  new Color(0.93F, 0.72F, 0.31F, 1F)};
     protected int blockType;
     protected int rotationState = 0;
     private int[][] blockArray;
     private int[] center;
     private boolean placed = false;
+    private Color blockColour;
 
+    public Color getBlockColour() {
+        return blockColour;
+    }
 
     public TetrisBlock(int blockType) {
         blockArray = blockStates[blockType][rotationState].clone();
         this.blockType = blockType;
         center = new int[] {2, 4};
         updateBlockArray();
+        blockColour = blockColours.clone()[blockType];
     }
 
     public void updateBlockArray() {
@@ -39,6 +53,7 @@ public class TetrisBlock {
         this.blockType = blockType;
         this.center = center.clone();
         updateBlockArray();
+        blockColour = blockColours.clone()[blockType];
     }
 
     public void place() {
@@ -76,9 +91,9 @@ public class TetrisBlock {
     public String toString() {
         String blockString = "";
         String blockGrid[][] = new String[4][4];
-        blockGrid[1][1] = "[[]";
+        blockGrid[1][1] = "[#" + blockColour + "]" + "[[]" + "[]";
         for (int[] blockCoords : blockStates[blockType][rotationState]) {
-            blockGrid[1 + blockCoords[0]][1 + blockCoords[1]] = "[[]";
+            blockGrid[1 + blockCoords[0]][1 + blockCoords[1]] = "[#" + blockColour + "]" + "[[]" + "[]";
         }
 
         for (String[] blockRow : blockGrid) {
