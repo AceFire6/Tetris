@@ -509,7 +509,7 @@ public class Tetris extends ApplicationAdapter {
     }
 
     private void drawUI() {
-        int LEFTMOST_BORDER = 475;
+        int LEFTMOST_BORDER = 450;
         String storedBlockString = "";
 
         if (! nextBlockString.equals("") || ! blockNext.toString().equals(nextBlockString)) {
