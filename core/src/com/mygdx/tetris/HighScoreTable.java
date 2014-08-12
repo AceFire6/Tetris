@@ -12,8 +12,8 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
     public void addScore(String name, int playscore, Date date) {
         GregorianCalendar dateCal = new GregorianCalendar();
         dateCal.setTime(date);
-        if (name.length() < 5) {
-            for (int i = 0; i < 5 - name.length(); i++) {
+        if (name.length() < 6) {
+            for (int i = 0; i < 6 - name.length(); i++) {
                 name += " ";
             }
         }
