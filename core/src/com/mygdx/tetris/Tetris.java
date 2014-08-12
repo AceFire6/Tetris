@@ -120,7 +120,10 @@ public class Tetris extends ApplicationAdapter {
                     resetTimers();
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    exit();
+                    restart();
+                    paused = false;
+                    startScreen = true;
+                    resetTimers();
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.R)) {
                     restart();
@@ -129,9 +132,9 @@ public class Tetris extends ApplicationAdapter {
             String pausedText = "PAUSED\n\n" +
                                 "Push Escape to unpause\n" +
                                 "Push R to Restart\n" +
-                                "Push Q to Quit";
+                                "Push Q to return to the main menu.";
             font.setScale(2F, 2F);
-            font.drawMultiLine(batch, pausedText, 0, Gdx.graphics.getHeight() *
+            font.drawWrapped(batch, pausedText, 0, Gdx.graphics.getHeight() *
                                                      0.70F, Gdx.graphics.getWidth(),
                                HAlignment.CENTER);
         } else if (gameOverScreen) {
