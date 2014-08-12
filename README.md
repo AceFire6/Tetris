@@ -1,5 +1,7 @@
 # Tetris Clone - Assignment 1 - CSC2003S
 
+![Screenshot](screenshot1.png)
+
 ## Description
 A clone of the original tetris. Made for my first game development assignment.
 
