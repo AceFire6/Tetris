@@ -55,9 +55,7 @@ public class Tetris extends ApplicationAdapter {
         font.setMarkupEnabled(true);
         font.setColor(Color.LIGHT_GRAY);
         fillBoard();
-        movementTimer = System.currentTimeMillis();
-        functionTimer = System.currentTimeMillis();
-        gravityTime = System.currentTimeMillis();
+        resetTimers();
         paused = false;
         startScreen = true;
         controlsScreen = false;
@@ -77,10 +75,12 @@ public class Tetris extends ApplicationAdapter {
             if ((System.currentTimeMillis() - functionTimer) > 250) {
                 if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
                     startScreen = false;
+                    resetTimers();
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.H)) {
                     startScreen = false;
                     controlsScreen = true;
+                    resetTimers();
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.C)) {
                     highScores = new HighScoreTable();
@@ -117,7 +117,7 @@ public class Tetris extends ApplicationAdapter {
             if ((System.currentTimeMillis() - functionTimer) > 250) {
                 if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
                     paused = false;
-                    functionTimer = System.currentTimeMillis();
+                    resetTimers();
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
                     exit();
@@ -181,6 +181,10 @@ public class Tetris extends ApplicationAdapter {
         blockNext = null;
         storedBlock = null;
         assignTetrisBlocks();
+        resetTimers();
+    }
+
+    private void resetTimers() {
         movementTimer = System.currentTimeMillis();
         functionTimer = System.currentTimeMillis();
         gravityTime = System.currentTimeMillis();
