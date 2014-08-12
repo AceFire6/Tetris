@@ -51,7 +51,11 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
     public Integer peek() {
         if (size() > 0) {
             //Check the fifth value
-            return ((Integer) sortByValue(this).values().toArray()[4]);
+            if (size() >= 4) {
+                return ((Integer) sortByValue(this).values().toArray()[4]);
+            } else {
+                return ((Integer) sortByValue(this).values().toArray()[size() - 1]);
+            }
         } else {
             return 0;
         }
