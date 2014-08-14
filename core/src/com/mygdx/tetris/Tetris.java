@@ -1,6 +1,8 @@
 package com.mygdx.tetris;
 
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -41,9 +43,19 @@ public class Tetris extends ApplicationAdapter {
     private boolean swapped;
     private int smallestHighScore;
     private String playerName;
+    private Sound lineClearSound;
+    private Sound rotateSound;
+    private Music bgMusic;
 
     @Override
     public void create() {
+        rotateSound = Gdx.audio.newSound(Gdx.files.internal("sound/button-press.mp3"));
+        lineClearSound = Gdx.audio.newSound(Gdx.files.internal("sound/beep.mp3"));
+        bgMusic = Gdx.audio.newMusic(Gdx.files.internal("sound/chiptune_does_dubstep.mp3"));
+        bgMusic.setLooping(true);
+        bgMusic.setVolume(0.8F);
+        bgMusic.play();
+
         highScores = new HighScoreTable();
         getPreferences();
         tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
@@ -163,6 +175,9 @@ public class Tetris extends ApplicationAdapter {
     public void dispose() {
         batch.dispose();
         font.dispose();
+        lineClearSound.dispose();
+        rotateSound.dispose();
+        bgMusic.dispose();
     }
 
     public void restart() {
@@ -277,6 +292,9 @@ public class Tetris extends ApplicationAdapter {
             }
         }
         drawBoard();
+        for (int j = 0; j < rowsRemoved; j++) {
+            lineClearSound.play();
+        }
         for (int i = 0; i < rowsRemoved; i++) {
             for (int k = BOARD_HEIGHT - 1; k > 0; k--) {
                 if (checkEmptyRow(tetrisGrid[k].clone())) {
@@ -386,6 +404,7 @@ public class Tetris extends ApplicationAdapter {
         clearCurrentBlock();
         if (canRotate() && ! blockSet) {
             blockCurrent.rotateBlock();
+            rotateSound.play();
         }
         updateBlockPosition();
     }
@@ -473,6 +492,7 @@ public class Tetris extends ApplicationAdapter {
         blockNext = new TetrisBlock(randBlock.nextInt(7));
         playerScore += 25;
         swapped = false;
+        lineClearSound.play(1F, 1.5F, 0F);
     }
 
     private void drawHeading() {
