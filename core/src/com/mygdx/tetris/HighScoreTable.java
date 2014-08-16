@@ -3,7 +3,7 @@ package com.mygdx.tetris;
 
 import java.util.*;
 
-public class HighScoreTable extends LinkedHashMap<String, Integer> {
+public class HighScoreTable extends ArrayList<String> {
 
     public HighScoreTable() {
         super();
@@ -19,60 +19,52 @@ public class HighScoreTable extends LinkedHashMap<String, Integer> {
         }
         name += "  "  + dateCal.get(Calendar.DAY_OF_MONTH) + "/" + dateCal.get(Calendar.MONTH) +
                 "/" + dateCal.get(Calendar.YEAR);
-        put(name, playscore);
+        add(name + ": " + playscore);
     }
 
     public String getAsString() {
+        sort();
         String highScoreString = "";
-        Set<String> keys = sortByValue((HighScoreTable) this.clone()).keySet();
-        int counter = 0;
-        for (String key : keys) {
-            if (counter < 5) {
-                highScoreString += key + "  " + this.get(key) + "\n";
-                counter++;
-            } else {
-                break;
-            }
-        }
-        return highScoreString;
-    }
-
-    public String getForFile() {
-        String highScoreString = "";
-        Set<String> keys = this.keySet();
-        for (String key : keys) {
-            highScoreString += key;
-            highScoreString += ":";
-            highScoreString += this.get(key) + "\n";
+        for (String key: this) {
+            highScoreString += key + "\n";
         }
         return highScoreString;
     }
 
     public Integer peek() {
-        if (size() > 0) {
-            //Check the fifth value
-            if (size() >= 4) {
-                return ((Integer) sortByValue(this).values().toArray()[4]);
-            } else {
-                return ((Integer) sortByValue(this).values().toArray()[size() - 1]);
-            }
-        } else {
-            return 0;
+        int[] scores = new int[size()];
+        int index = 0;
+        for (String key: this.toArray(new String[size()])) {
+            scores[index] = Integer.parseInt(key.split(": ")[1]);
+            index++;
         }
+
+        Arrays.sort(scores);
+
+        if (size() > 0) {
+            return scores[0];
+        }
+        return 0;
     }
 
-    /**
-     * Adapted from http://stackoverflow.com/a/2581754
-     */
-    public static HighScoreTable sortByValue(HighScoreTable hsTable) {
-        List<Map.Entry<String, Integer>> list =
-                new LinkedList<Map.Entry<String, Integer>>(hsTable.entrySet());
-        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
-            @Override
-            public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
-                return (o2.getValue()).compareTo(o1.getValue());
+    private void sort() {
+        String[] scores = new String[size()];
+        this.toArray(scores);
+        for (int i = 0; i < scores.length; i++) {
+            for (int j = 0; j < scores.length; j++) {
+                if (Integer.parseInt(scores[j].split(": ")[1]) < Integer.parseInt(scores[i].split
+                        (": ")[1])) {
+                    String temp = scores[j];
+                    scores[j] = scores[i];
+                    scores[i] = temp;
+                }
             }
-        });
+        }
+
+        this.clear();
+        this.addAll(Arrays.asList(scores));
+    }
+
 
         HighScoreTable result = new HighScoreTable();
         for (Map.Entry<String, Integer> entry : list) {
