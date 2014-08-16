@@ -213,7 +213,7 @@ public class Tetris extends ApplicationAdapter {
     }
 
     private void exit() {
-        prefs.putString("highscores", highScores.getForFile());
+        prefs.putString("highscores", highScores.getAsString());
         prefs.flush();
         Gdx.app.exit();
     }
@@ -223,10 +223,9 @@ public class Tetris extends ApplicationAdapter {
         if (prefs.contains("highscores")) {
             String highScoresList = prefs.getString("highscores");
             for (String highscore : highScoresList.split("\n")) {
-                if (highscore.split(":").length == 2) {
+                if (highscore.split(": ").length == 2) {
                     try {
-                        highScores.put(highscore.split(":")[0], Integer.parseInt(highscore.split
-                                (":")[1]));
+                        highScores.add(highscore);
                     } catch (NullPointerException npe) {
                         prefs.clear();
                         getPreferences();
@@ -606,13 +605,17 @@ public class Tetris extends ApplicationAdapter {
     public class HighScoreInputListener implements Input.TextInputListener {
         @Override
         public void input(String text) {
-            text = text.replaceAll(" ", "");
+            text = text.trim();
             text = text.replaceAll(":", "");
-            text = text.replaceAll("\n", "");
-            if (text.length() <= 6) {
-                highScores.addScore(text, playerScore, new Date());
+            if (text.equals("")) {
+                playerName = "Anon";
+                highScores.addScore(playerName, playerScore, new Date());
+            } else if (text.length() <= 6) {
+                playerName = text;
+                highScores.addScore(playerName, playerScore, new Date());
             } else {
-                highScores.addScore(text.substring(0, 5), playerScore, new Date());
+                playerName = text.substring(0, 5);
+                highScores.addScore(playerName, playerScore, new Date());
             }
         }
 
