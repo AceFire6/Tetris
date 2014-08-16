@@ -10,16 +10,18 @@ public class HighScoreTable extends ArrayList<String> {
     }
 
     public void addScore(String name, int playscore, Date date) {
+        sort();
         GregorianCalendar dateCal = new GregorianCalendar();
         dateCal.setTime(date);
-        if (name.length() < 6) {
-            for (int i = 0; i < 6 - name.length(); i++) {
+        if (name.length() < 8) {
+            for (int i = 0; i < 10 - name.length(); i++) {
                 name += " ";
             }
         }
-        name += "  "  + dateCal.get(Calendar.DAY_OF_MONTH) + "/" + dateCal.get(Calendar.MONTH) +
+        name += dateCal.get(Calendar.DAY_OF_MONTH) + "/" + dateCal.get(Calendar.MONTH) +
                 "/" + dateCal.get(Calendar.YEAR);
         add(name + ": " + playscore);
+        cullValues();
     }
 
     public String getAsString() {
@@ -65,11 +67,16 @@ public class HighScoreTable extends ArrayList<String> {
         this.addAll(Arrays.asList(scores));
     }
 
+    private void cullValues() {
+        sort();
+        int length = Math.min(5, size());
+        String[] scores = new String[length];
 
-        HighScoreTable result = new HighScoreTable();
-        for (Map.Entry<String, Integer> entry : list) {
-            result.put(entry.getKey(), entry.getValue());
+        for (int i = 0; i < length; i++) {
+            scores[i] = this.get(i);
         }
-        return result;
+
+        this.clear();
+        this.addAll(Arrays.asList(scores));
     }
 }
