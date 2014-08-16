@@ -253,12 +253,14 @@ public class Tetris extends ApplicationAdapter {
         drawBoard();
         drawUI();
 
-        if ((System.currentTimeMillis() - gravityTime) > (800 / (gravity * gravityModifier))) {
-            doGravity();
+        if ((System.currentTimeMillis() - gravityTimer) > (800 / (gravity * gravityModifier))) {
+            if (!doGravity())  {
+                setBlock();
+            }
         }
         if (playerScore > playerLevel * 1000) {
             playerLevel++;
-            gravity += 0.25;
+            gravity += 0.3;
         }
 
         handleInput();
@@ -280,8 +282,7 @@ public class Tetris extends ApplicationAdapter {
     }
 
     private void hardDrop() {
-        while (!blockSet) {
-            doGravity();
+        while (doGravity()) {
             playerScore += 1;
         }
     }
@@ -460,16 +461,16 @@ public class Tetris extends ApplicationAdapter {
                                        blockCurrent.getCenter()[1] + 1});
     }
 
-    private void doGravity() {
+    private boolean doGravity() {
         clearCurrentBlock();
         if (isCollision(1, 0)) {
             updateBlockPosition();
-            setBlock();
-            return;
+            return false;
         }
         updateBlockPosition(new int[] {blockCurrent.getCenter()[0] + 1,
                                        blockCurrent.getCenter()[1]});
-        gravityTime = System.currentTimeMillis();
+        gravityTimer = System.currentTimeMillis();
+        return true;
     }
 
     private boolean isCollision(int xOffset, int yOffset) {
