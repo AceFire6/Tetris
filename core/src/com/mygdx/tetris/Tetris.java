@@ -66,14 +66,7 @@ public class Tetris extends ApplicationAdapter {
         font = new BitmapFont(fontFile);
         font.setMarkupEnabled(true);
         font.setColor(Color.LIGHT_GRAY);
-        fillBoard();
-        resetTimers();
-        paused = false;
-        startScreen = true;
-        controlsScreen = false;
-        gameOverScreen = false;
-        swapped = false;
-        assignTetrisBlocks();
+        start();
     }
 
     @Override
@@ -180,20 +173,31 @@ public class Tetris extends ApplicationAdapter {
         bgMusic.dispose();
     }
 
-    public void restart() {
-        prefs.putString("highscores", highScores.getForFile());
-        prefs.flush();
-        getPreferences();
+    public void start() {
+        if (prefs != null) {
+            prefs.putString("highscores", highScores.getAsString());
+            prefs.flush();
+        }
+
+        highScores = new HighScoreTable();
         tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
         playerScore = 0;
         playerLevel = 1;
+        getPreferences();
+        tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
         fillBoard();
         gravityModifier = 1;
         gravity = 1;
-        paused = false;
-        startScreen = false;
-        controlsScreen = false;
-        gameOverScreen = false;
+
+        startScreen = true;
+        if (gameOverScreen || paused) {
+            paused = false;
+            startScreen = false;
+            controlsScreen = false;
+            gameOverScreen = false;
+            inGame = true;
+        }
+        blockSet = false;
         swapped = false;
         blockCurrent = null;
         blockNext = null;
@@ -267,9 +271,11 @@ public class Tetris extends ApplicationAdapter {
                     HighScoreInputListener listener = new HighScoreInputListener();
                     Gdx.input.getTextInput(listener, "You've got a high score!", playerName);
                 }
+                inGame = false;
                 gameOverScreen = true;
+            } else {
+                blockSet = false;
             }
-            blockSet = false;
             checkCompleteRows();
         }
     }
