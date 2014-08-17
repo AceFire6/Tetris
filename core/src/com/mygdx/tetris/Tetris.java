@@ -13,10 +13,19 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import java.util.Date;
 import java.util.Random;
 
+/**
+ * @author Jethro Muller - MLLJET001
+ * @version 1.0.0
+ *
+ * Tetris clone for Game Development course(CSC2003S, UCT).
+ */
 
 public class Tetris extends ApplicationAdapter {
     protected static final int BOARD_HEIGHT = 27;
     protected static final int BOARD_WIDTH = 10;
+    /**
+     * The 2D array that represents the tetris board.
+     */
     protected String[][] tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
     private static Preferences prefs;
     private static HighScoreTable highScores;
@@ -28,6 +37,9 @@ public class Tetris extends ApplicationAdapter {
     private TetrisBlock blockNext = null;
     private TetrisBlock storedBlock = null;
     private String nextBlockString = "";
+    /**
+     * Whether or not the block has landed and can no longer be moved.
+     */
     private boolean blockSet = false;
     private Random randBlock = new Random();
     private double gravity = 1;
@@ -39,23 +51,32 @@ public class Tetris extends ApplicationAdapter {
     private boolean controlsScreen;
     private boolean gameOverScreen;
     private boolean inGame;
+    /**
+     * Whether or not the block has been switched this cycle.
+     */
     private boolean swapped;
-    private int smallestHighScore;
+    private int lowestHighScore;
     private String playerName;
     private Sound lineClearSound;
     private Sound rotateSound;
-    private Music bgMusic;
+    private Music backgroundMusic;
+    /**
+     * Whether or not the sound effects are muted.
+     */
     private boolean soundsMuted;
-    private String colorTetris = "[RED]T[CYAN]E[MAGENTA]T[ORANGE]R[BLUE]I[GREEN]S[LIGHT_GRAY]";
+    /**
+     * The tetris heading with added colour.
+     */
+    private String colourTetris = "[RED]T[CYAN]E[MAGENTA]T[ORANGE]R[BLUE]I[GREEN]S[LIGHT_GRAY]";
 
     @Override
     public void create() {
         rotateSound = Gdx.audio.newSound(Gdx.files.internal("sound/button-press.mp3"));
         lineClearSound = Gdx.audio.newSound(Gdx.files.internal("sound/beep.mp3"));
-        bgMusic = Gdx.audio.newMusic(Gdx.files.internal("sound/chiptune_does_dubstep.mp3"));
-        bgMusic.setLooping(true);
-        bgMusic.setVolume(0.8F);
-        bgMusic.play();
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("sound/chiptune_does_dubstep.mp3"));
+        backgroundMusic.setLooping(true);
+        backgroundMusic.setVolume(0.8F);
+        backgroundMusic.play();
         soundsMuted = false;
         batch = new SpriteBatch();
         FileHandle fontFile = Gdx.files.getFileHandle("font/novamono.fnt", Files.FileType.Local);
@@ -73,9 +94,9 @@ public class Tetris extends ApplicationAdapter {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         batch.begin();
-        if (startScreen) {
+        if (startScreen) { // The main menu
             drawWelcome();
-        } else if (controlsScreen) {
+        } else if (controlsScreen) { // The controls screen
             String controls = "        [RED]UP[] - Rotate block clockwise\n" +
                               "[RED]LEFT/RIGHT[] - Move block\n" +
                               "      [RED]DOWN[] - Speed up block\n" +
@@ -93,7 +114,7 @@ public class Tetris extends ApplicationAdapter {
             font.drawMultiLine(batch, controls, 130, Gdx.graphics.getHeight() - 100);
             font.drawMultiLine(batch, finalControl, 0, Gdx.graphics.getHeight() -
                                                    350, Gdx.graphics.getWidth(), HAlignment.CENTER);
-        } else if (paused) {
+        } else if (paused) { // When the player pauses the game
             String pausedHeading = "[CYAN]PAUSED[]\n\n";
             String pausedText = "[RED]Escape[] - Unpause\n" +
                                 "     [RED]R[] - Restart\n" +
@@ -105,7 +126,7 @@ public class Tetris extends ApplicationAdapter {
                                HAlignment.CENTER);
             font.setScale(1.5F, 1.5F);
             font.drawMultiLine(batch, pausedText, 175, Gdx.graphics.getHeight() * 0.80F);
-        } else if (gameOverScreen) {
+        } else if (gameOverScreen) { // When the player loses
             String gameOver = "[RED]Game Over![]" +
                               "\nYou Scored: " + playerScore;
             String gameOverControls = "[RED]R[] - Restart" +
@@ -115,7 +136,7 @@ public class Tetris extends ApplicationAdapter {
                                                    0.80F, Gdx.graphics.getWidth(),
                                HAlignment.CENTER);
             font.drawMultiLine(batch, gameOverControls, 250, Gdx.graphics.getHeight() * 0.60F);
-        } else if (inGame) {
+        } else if (inGame) { // When the player is in game
             gameLoop();
         }
         batch.end();
@@ -127,9 +148,13 @@ public class Tetris extends ApplicationAdapter {
         font.dispose();
         lineClearSound.dispose();
         rotateSound.dispose();
-        bgMusic.dispose();
+        backgroundMusic.dispose();
     }
 
+    /**
+     * Initializes all the necessary variables.
+     * Is used to restart the game.
+     */
     public void start() {
         if (prefs != null) {
             prefs.putString("highscores", highScores.getAsString());
@@ -163,15 +188,22 @@ public class Tetris extends ApplicationAdapter {
         resetTimers();
     }
 
+    /**
+     * Sets the input handler to one that has all the necessary input handling.
+     * Handles the input for all events that happen with a single key press.
+     * Like rotating or dropping the block.
+     *
+     * Handles the input of this type for all game states.
+     */
     private void setInputHandler() {
         Gdx.input.setInputProcessor(new InputAdapter() {
             @Override
             public boolean keyDown(int keycode) {
                 if (keycode == Input.Keys.M) {
-                    if (bgMusic.getVolume() > 0F) {
-                        bgMusic.setVolume(0);
+                    if (backgroundMusic.getVolume() > 0F) {
+                        backgroundMusic.setVolume(0);
                     } else {
-                        bgMusic.setVolume(0.8F);
+                        backgroundMusic.setVolume(0.8F);
                     }
                     return true;
                 }
@@ -253,17 +285,31 @@ public class Tetris extends ApplicationAdapter {
         });
     }
 
+    /**
+     * Resets the key-press timers.
+     */
     private void resetTimers() {
         movementTimer = System.currentTimeMillis();
         gravityTimer = System.currentTimeMillis();
     }
 
+    /**
+     * Handles exiting the game. Outputs the current highscores using Gdx's built in
+     * settings-file handler.
+     *
+     * Makes the proper Gdx exit call.
+     */
     private void exit() {
         prefs.putString("highscores", highScores.getAsString());
         prefs.flush();
         Gdx.app.exit();
     }
 
+    /**
+     * Reads the highscores in from the local filesystem.
+     *
+     * If any of the highscores are malformed, it resets the local highscores.
+     */
     private void getPreferences() {
         prefs = Gdx.app.getPreferences("Tetris");
         if (prefs.contains("highscores")) {
@@ -279,21 +325,29 @@ public class Tetris extends ApplicationAdapter {
                     }
                 } else {
                     highScores = new HighScoreTable();
-                    smallestHighScore = 0;
+                    lowestHighScore = 0;
                     return;
                 }
             }
-            smallestHighScore = highScores.peek();
+            lowestHighScore = highScores.peek();
         } else {
             highScores = new HighScoreTable();
-            smallestHighScore = 0;
+            lowestHighScore = 0;
         }
     }
 
+    /**
+     * Adds the player to the high score list.
+     * @param name    The name the player entered.
+     */
     private void addToHighScores(String name) {
         highScores.addScore(name, playerScore, new Date());
     }
 
+    /**
+     * The main game loop that handles all the ui drawing and timed events as well
+     * as the movement controls.
+     */
     private void gameLoop() {
         drawHeading();
         drawBoard();
@@ -313,8 +367,8 @@ public class Tetris extends ApplicationAdapter {
 
         if (blockSet) {
             if (isCollision(0, 0)) {
-                smallestHighScore = highScores.peek();
-                if (playerScore > smallestHighScore || highScores.size() < 5) {
+                lowestHighScore = highScores.peek();
+                if (playerScore > lowestHighScore || highScores.size() < 5) {
                     HighScoreInputListener listener = new HighScoreInputListener();
                     Gdx.input.getTextInput(listener, "You've got a high score!", playerName);
                 }
@@ -327,12 +381,21 @@ public class Tetris extends ApplicationAdapter {
         }
     }
 
+    /**
+     * Drops the block until it can't go any further.
+     * Adds one to the player's score for each block gone through.
+     */
     private void hardDrop() {
         while (doGravity()) {
             playerScore += 1;
         }
     }
 
+    /**
+     * Checks the tetris grid for any rows that had been completed upon the block becoming set.
+     * If there are any rows that have been completed, they are cleared and the rows above them
+     * are shifted down.
+     */
     private void checkCompleteRows() {
         clearCurrentBlock();
         int rowsRemoved = 0;
@@ -363,6 +426,11 @@ public class Tetris extends ApplicationAdapter {
         drawBoard();
     }
 
+    /**
+     * Checks if the given row is filled.
+     * @param row    The row to be checked.
+     * @return boolean Whether or not the row was full.
+     */
     private boolean checkFullRow(String[] row) {
         for (String rowItem : row) {
             if (! rowItem.contains("[[]")) {
@@ -372,6 +440,11 @@ public class Tetris extends ApplicationAdapter {
         return true;
     }
 
+    /**
+     * Checks if the row is empty.
+     * @param row    The row to be checked.
+     * @return boolean Whether or not the row is empty.
+     */
     private boolean checkEmptyRow(String[] row) {
         for (String rowItem : row) {
             if (rowItem.contains("[[]") || rowItem.equals("==")) {
@@ -381,6 +454,9 @@ public class Tetris extends ApplicationAdapter {
         return true;
     }
 
+    /**
+     * Handles movement input. The input that can be held down.
+     */
     private void handleInput() {
         if ((System.currentTimeMillis() - movementTimer) > 120 && ! blockSet) {
             if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
@@ -399,6 +475,10 @@ public class Tetris extends ApplicationAdapter {
         }
     }
 
+    /**
+     * Stores the currently active block for later use.
+     * If there is already a block stored, it swaps the current block for the stored block.
+     */
     private void storeBlock() {
         clearCurrentBlock();
         if (storedBlock == null) {
@@ -416,6 +496,10 @@ public class Tetris extends ApplicationAdapter {
         updateBlockPosition();
     }
 
+    /**
+     * Checks if the block can be rotated.
+     * @return boolean Whether or not the block can be rotated.
+     */
     private boolean canRotate() {
         int[][] nextRotation = blockCurrent.getNextRotation();
         for (int[] nextRotationCoord : nextRotation) {
@@ -433,6 +517,9 @@ public class Tetris extends ApplicationAdapter {
         return true;
     }
 
+    /**
+     * Rotate the current block.
+     */
     private void doRotate() {
         clearCurrentBlock();
         if (canRotate() && ! blockSet) {
@@ -444,6 +531,9 @@ public class Tetris extends ApplicationAdapter {
         updateBlockPosition();
     }
 
+    /**
+     * Updates the current blocks position in the tetris grid.
+     */
     private void updateBlockPosition() {
         for (int[] blockCoords : blockCurrent.getBlockArray()) {
             tetrisGrid[blockCoords[0]][blockCoords[1]] = "[#" + blockCurrent.getBlockColour() +
@@ -451,11 +541,12 @@ public class Tetris extends ApplicationAdapter {
         }
         tetrisGrid[blockCurrent.getCenter()[0]][blockCurrent.getCenter()[1]]
                 = "[#" + blockCurrent.getBlockColour() + "]" + "[[]" + "[]";
-        if (! blockCurrent.isPlaced()) {
-            blockCurrent.place();
-        }
     }
 
+    /**
+     * Deletes the '[]' for the current block from the block grid to prevent collision detection
+     * errors.
+     */
     private void clearCurrentBlock() {
         tetrisGrid[blockCurrent.getCenter()[0]][blockCurrent.getCenter()[1]] = ". ";
         for (int[] blockCoords : blockCurrent.getBlockArray()) {
@@ -463,11 +554,18 @@ public class Tetris extends ApplicationAdapter {
         }
     }
 
+    /**
+     * Gives the current block a new center and then updates its position, thereby moving it.
+     * @param newCenter The blocks new center.
+     */
     private void updateBlockPosition(int[] newCenter) {
         blockCurrent.setCenter(newCenter.clone());
         updateBlockPosition();
     }
 
+    /**
+     * Moves the block to the left.
+     */
     private void moveBlockLeft() {
         clearCurrentBlock();
 
@@ -479,6 +577,9 @@ public class Tetris extends ApplicationAdapter {
                                        blockCurrent.getCenter()[1] - 1});
     }
 
+    /**
+     * Moves the block to the right.
+     */
     private void moveBlockRight() {
         clearCurrentBlock();
 
@@ -490,6 +591,10 @@ public class Tetris extends ApplicationAdapter {
                                        blockCurrent.getCenter()[1] + 1});
     }
 
+    /**
+     * Moves the block down by one place if possible.
+     * @return Whether or not there was a collision while moving the block down.
+     */
     private boolean doGravity() {
         clearCurrentBlock();
         if (isCollision(1, 0)) {
@@ -502,6 +607,13 @@ public class Tetris extends ApplicationAdapter {
         return true;
     }
 
+    /**
+     * Checks to see if there will be a collision if the block is moved according to the given
+     * offsets.
+     * @param xOffset The offset in the x-direction
+     * @param yOffset The offset in the y-direction
+     * @return boolean Whether or not there will be a collision.
+     */
     private boolean isCollision(int xOffset, int yOffset) {
         int[] center = blockCurrent.getCenter().clone();
         try {
@@ -521,6 +633,10 @@ public class Tetris extends ApplicationAdapter {
         return false;
     }
 
+    /**
+     * Sets the block in place, handles the assignment on the next block and the new next block.
+     * Resets the swapped variable and adds to the score.
+     */
     private void setBlock() {
         blockSet = true;
         blockCurrent = blockNext.cloneBlock();
@@ -533,16 +649,22 @@ public class Tetris extends ApplicationAdapter {
         }
     }
 
+    /**
+     * Draws the heading during the game, above the grid.
+     */
     private void drawHeading() {
         font.setScale(2F, 2F);
-        font.drawMultiLine(batch, colorTetris, 0,
+        font.drawMultiLine(batch, colourTetris, 0,
                            Gdx.graphics.getHeight() - 20,
                            Gdx.graphics.getWidth() * 0.60F, HAlignment.CENTER);
     }
 
+    /**
+     * Draws the main menu.
+     */
     private void drawWelcome() {
         font.setScale(5F, 5F);
-        font.drawMultiLine(batch, colorTetris, 0,
+        font.drawMultiLine(batch, colourTetris, 0,
                            Gdx.graphics.getHeight() -
                                                100, Gdx.graphics.getWidth(), HAlignment.CENTER);
 
@@ -559,6 +681,9 @@ public class Tetris extends ApplicationAdapter {
         font.drawMultiLine(batch, homeControls, 200, Gdx.graphics.getHeight() - 350);
     }
 
+    /**
+     * Draws the tetris grid.
+     */
     private void drawBoard() {
         font.setScale(1F, 1F);
         String board = getBoardAsString();
@@ -567,6 +692,9 @@ public class Tetris extends ApplicationAdapter {
                            Gdx.graphics.getWidth() * 0.60F, HAlignment.CENTER);
     }
 
+    /**
+     * Draws all the UI elements on the right of the screen.
+     */
     private void drawUI() {
         int LEFTMOST_BORDER = 450;
         String storedBlockString = "";
@@ -598,6 +726,11 @@ public class Tetris extends ApplicationAdapter {
         font.drawMultiLine(batch, highScores.getAsString(), LEFTMOST_BORDER, 275);
     }
 
+    /**
+     * Fills the board so that it's blank when the player starts.
+     *
+     * The board is filled with '. 's everywhere except the last row, which is filled with '=='s.
+     */
     private void fillBoard() {
         for (int i = 0; i < BOARD_HEIGHT; i++) {
             for (int j = 0; j < BOARD_WIDTH; j++) {
@@ -610,12 +743,20 @@ public class Tetris extends ApplicationAdapter {
         }
     }
 
+    /**
+     * Erases the given row by replacing anything in the row cells with '. '.
+     * @param rowIndex The row to be erased.
+     */
     private void eraseRow(int rowIndex) {
         for (int i = 0; i < tetrisGrid[rowIndex].length; i++) {
             tetrisGrid[rowIndex][i] = ". ";
         }
     }
 
+    /**
+     * Returns the board as a string so it can be displayed.
+     * @return String representation of the tetris grid.
+     */
     private String getBoardAsString() {
         String boardAsString = "";
         for (int i = 0; i < BOARD_HEIGHT; i++) {
@@ -631,11 +772,18 @@ public class Tetris extends ApplicationAdapter {
         return boardAsString;
     }
 
+    /**
+     * Assigns tetris blocks to the current and next block objects.
+     */
     private void assignTetrisBlocks() {
         blockNext = new TetrisBlock(randBlock.nextInt(7));
         blockCurrent = new TetrisBlock(randBlock.nextInt(7));
     }
 
+    /**
+     * Handles the highscore input. Formats the names to the appropriate length and does basic
+     * sensitization on each name to prevent a name entry that wipes the highscore table.
+     */
     public class HighScoreInputListener implements Input.TextInputListener {
         @Override
         public void input(String text) {

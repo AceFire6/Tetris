@@ -3,12 +3,28 @@ package com.mygdx.tetris;
 
 import java.util.*;
 
+/**
+ * @author Jethro Muller - MLLJET001
+ * @version 1.0.0
+ *
+ * The highscore table helps manage Tetris's high score list.
+ */
+
 public class HighScoreTable extends ArrayList<String> {
 
+    /**
+     * Default constructor
+     */
     public HighScoreTable() {
         super();
     }
 
+    /**
+     * Adds the given player detials to the highscore list.
+     * @param name         String containing the player's name.
+     * @param playscore    int that is the player's score.
+     * @param date         The date the player achieved the score.
+     */
     public void addScore(String name, int playscore, Date date) {
         sort();
         GregorianCalendar dateCal = new GregorianCalendar();
@@ -24,6 +40,10 @@ public class HighScoreTable extends ArrayList<String> {
         cullValues();
     }
 
+    /**
+     * Returns the highscore list as a string so it can be displayed on the UI.
+     * @return Highscore list as a string.
+     */
     public String getAsString() {
         sort();
         String highScoreString = "";
@@ -33,6 +53,10 @@ public class HighScoreTable extends ArrayList<String> {
         return highScoreString;
     }
 
+    /**
+     * Looks at the smallest value in the highscore list.
+     * @return Smallest value in the highscore list.
+     */
     public Integer peek() {
         int[] scores = new int[size()];
         int index = 0;
@@ -49,6 +73,9 @@ public class HighScoreTable extends ArrayList<String> {
         return 0;
     }
 
+    /**
+     * Sort the highscore list by the player's score.
+     */
     private void sort() {
         String[] scores = new String[size()];
         this.toArray(scores);
@@ -67,6 +94,9 @@ public class HighScoreTable extends ArrayList<String> {
         this.addAll(Arrays.asList(scores));
     }
 
+    /**
+     * Removes all values except the top 5.
+     */
     private void cullValues() {
         sort();
         int length = Math.min(5, size());
