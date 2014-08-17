@@ -13,8 +13,8 @@ It uses:
  * The [libGDX](http://libgdx.badlogicgames.com/) engine.
  * The font, [Novamono](https://www.google.com/fonts/specimen/Nova+Mono), is used for all on
  screen text(including the tetris blocks and grid).
- * [Chiptunes Do Dubstep - ASDF](http://youtube.com/findAuthor) for background music.
- * [Beep SF](findLink) and [Click SF](findLink) as sound effects.
+ * [Chiptunes Do Dubstep by TeknoAXE](http://teknoaxe.com/Link_Code_2.php?q=305) for background music.
+ * [Beep SF](http://soundbible.com/291-Fuzzy-Beep.html) and [Click SF](http://soundbible.com/772-Button.html) as sound effects.
 
 ## Instructions
 #### To Run:
