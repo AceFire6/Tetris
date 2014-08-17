@@ -1,0 +1,171 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.css">
+    <title>Tetris - Readme</title>
+</head>
+<body class="container">
+<main class="row">
+    <div class="text-center">
+        <p><img id="heading" alt="Tetris" src="tetris.png"></p>
+        <h3>Tetris Clone - Assignment 1 - CSC2003S</h3>
+        <hr>
+        <div class="btn-group">
+            <a class="btn btn-default" href="#description">Description</a>
+            <a class="btn btn-default" href="#instructions">Instructions</a>
+            <a class="btn btn-default" href="#controls">Controls</a>
+            <a class="btn btn-default" href="#gameplay">Gameplay</a>
+        </div>
+    </div>
+    <hr>
+    <h2 id="description">Description <a href="#heading"><small><span
+            class="glyphicon glyphicon-share-alt"></span></small></a></h2>
+    <p>A clone of the original tetris. Made for my first game development assignment.</p>
+    <p>Its art-style and gameplay was based on the original tetris and was kept as simplistic as
+        possible.</p>
+    <p>It uses:</p>
+    <ul>
+        <li>The <a href="http://libgdx.badlogicgames.com/">libGDX</a> engine.</li>
+        <li>The font, <a href="https://www.google.com/fonts/specimen/Nova+Mono">Novamono</a>, is used for all on
+            screen text(including the tetris blocks and grid).</li>
+        <li><a href="http://youtube.com/findAuthor">Chiptunes Do Dubstep - ASDF</a> for background music.</li>
+        <li><a href="findLink">Beep SF</a> and <a href="findLink">Click SF</a> as sound effects.</li>
+    </ul>
+    <hr>
+    <h2 id="instructions">Instructions <a href="#heading"><small><span
+            class="glyphicon glyphicon-share-alt"></span></small></a></h2>
+    <h4>To Run: <small class="badge">Requires Gradle</small></h4>
+    <p>Unix based OS: <code>./gradlew desktop:run</code></p>
+    <p>Windows: <code>gradlew.bat desktop:run</code></p>
+    <h4>To Build: <small class="badge">Requires Gradle</small></h4>
+    <p>Unix based OS: <code>./gradlew desktop:dist</code></p>
+    <p>Windows: <code>gradlew.bat desktop:dist</code></p>
+    <p>The built .jar file will be in <code>desktop/build/libs/</code></p>
+    <p>To run it, change to the above directory and run: <code>java -jar desktop-1.0.jar</code></p>
+    <hr>
+    <h2 id="controls">Controls
+         <a href="#heading"><small><span class="glyphicon glyphicon-share-alt"></span></small></a></h2>
+    <h3>Main Menu:</h3>
+    <table class="table table-condensed">
+        <thead>
+        <tr>
+            <th>Key</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>ENTER</code></td>
+            <td>Start the game.</td>
+        </tr>
+        <tr>
+            <td><code>H</code></td>
+            <td>Displays the controls</td>
+        </tr>
+        <tr>
+            <td><code>C</code></td>
+            <td>Clear the highscore list</td>
+        </tr>
+        <tr>
+            <td><code>M</code></td>
+            <td>Mute music</td>
+        </tr>
+        <tr>
+            <td><code>N</code></td>
+            <td>Mute sound effects</td>
+        </tr>
+        <tr>
+            <td><code>Q</code></td>
+            <td>Quits the game.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <h3>In-game:</h3>
+    <table class="table table-condensed">
+        <thead>
+        <tr>
+            <th>Key</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><code>SPACE</code></td>
+            <td>Drop the currently controlled block.</td>
+        </tr>
+        <tr>
+            <td><code>LEFT SHIFT</code></td>
+            <td>Store the currently active block and replace it with the next block. (Can only be done once per block)</td>
+        </tr>
+        <tr>
+            <td><code>UP ARROW</code></td>
+            <td>Rotate the currently active block 90<sup>o</sup> clockwise.</td>
+        </tr>
+        <tr>
+            <td><code>RIGHT ARROW</code></td>
+            <td>Move the currently active block one space to the right.</td>
+        </tr>
+        <tr>
+            <td><code>LEFT ARROW</code></td>
+            <td>Move the currently active block one space to the left.</td>
+        </tr>
+        <tr>
+            <td><code>ESCAPE</code></td>
+            <td>Pause the game. Push again to unpause.</td>
+        </tr>
+        <tr>
+            <td><code>M</code></td>
+            <td>Mute music</td>
+        </tr>
+        <tr>
+            <td><code>N</code></td>
+            <td>Mute sound effects</td>
+        </tr>
+        <tr>
+            <td><code>R</code></td>
+            <td>Restart the game.</td>
+        </tr>
+        <tr>
+            <td><code>Q</code></td>
+            <td>Quits the game.</td>
+        </tr>
+        </tbody>
+    </table>
+    <hr>
+    <h2 id="gameplay">Gameplay <a href="#heading"><small><span class
+                                                                       ="glyphicon glyphicon-share-alt"></span></small></a></h2>
+    <p>The gameplay involves the player moving and positioning the various pieces in an attempt to complete
+        rows and avoid the blocks stacking to the top of the play area.</p>
+    <p>The player starts out with 0 points on level 1. As the completes rows, places pieces (or drops
+        them) they get points. When the points pass <code>level * 1000</code> the player levels up.</p>
+    <p>Levelling up increases the gravity which controls the speed of the blocks descent as well as the
+        number of points received for placing a block.</p>
+    <p>The speed at which the block falls is: <code>800ms / (gravity * gravityModifier)</code></p>
+    <p>The gravityModifier is used to speed up the block when the player push on the <code>DOWN</code> arrow key.</p>
+    <p>The player can move the blocks left or right and the blocks can be rotated by pushing the <code>UP</code>
+        arrow key.</p>
+    <p>If the player wishes, a single block can be stored by pushing <code>LEFT SHIFT</code>. If there is already a
+        stored block, the current block and stored block are swapped. Once a player has stored or
+        swapped a block, they can only do it again once they have place their new block. Swapping the
+        block provides a tactical edge as the new block starts at the top of the screen and it allows
+        you to save a piece you think you might need or swap out a useless block.</p>
+    <p>The player can drop the block from its current position. It will stop when it collides with the
+        floor or another block. The player gets points depending on the height the block drops from, so
+        you get more points by dropping the block instead of letting it fall.</p>
+    <p>The player receives points when a row is completed, the points gained are calculated as follows:
+        <code>(50 * rowsRemoved)</code>. So the more rows completed at once, the more points gained. When a block
+        lands, the player gets 25 points.</p>
+    <p>After the blocks land, there is a time (the same as the rate at which the block falls) in which the
+        block can be moved.</p>
+    <p>Finally, once the game is over, if the player has amassed enough points, more than the person
+        with the least points on the high score list, they will be prompted to enter their name. Their
+        score will be recorded and added to the list. The list is saved using the libGDX engine to the
+        local PC so the highscore list is persistent on the current PC.</p>
+    <img alt="Screenshot" src="screenshot1.png">
+</main>
+</body>
+</html>
