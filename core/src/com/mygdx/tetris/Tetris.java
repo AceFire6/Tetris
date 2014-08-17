@@ -582,17 +582,17 @@ public class Tetris extends ApplicationAdapter {
         font.draw(batch, level, LEFTMOST_BORDER, 700);
 
         String nextPiece = "Next Piece:";
-        font.drawMultiLine(batch, nextPiece, LEFTMOST_BORDER, 675);
-        font.drawMultiLine(batch, nextBlockString, LEFTMOST_BORDER + 50, 625);
+        font.drawMultiLine(batch, nextPiece, LEFTMOST_BORDER, 650);
+        font.drawMultiLine(batch, nextBlockString, LEFTMOST_BORDER + 50, 600);
 
         String storedPiece = "Stored Piece:";
-        font.drawMultiLine(batch, storedPiece, LEFTMOST_BORDER, 525);
-        font.drawMultiLine(batch, storedBlockString, LEFTMOST_BORDER + 50, 475);
+        font.drawMultiLine(batch, storedPiece, LEFTMOST_BORDER, 475);
+        font.drawMultiLine(batch, storedBlockString, LEFTMOST_BORDER + 50, 425);
 
-        String highScore = "High Scores:";
-        font.drawMultiLine(batch, highScore, LEFTMOST_BORDER, 375);
+        String highScore = "Top 5 High Scores:";
+        font.drawMultiLine(batch, highScore, LEFTMOST_BORDER, 325);
         font.setScale(0.8F);
-        font.drawMultiLine(batch, highScores.getAsString(), LEFTMOST_BORDER, 325);
+        font.drawMultiLine(batch, highScores.getAsString(), LEFTMOST_BORDER, 275);
     }
 
     private void fillBoard() {
