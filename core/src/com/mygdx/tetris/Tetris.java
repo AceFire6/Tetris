@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.HAlignment;
-import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.Date;
@@ -34,18 +33,20 @@ public class Tetris extends ApplicationAdapter {
     private double gravity = 1;
     private int gravityModifier = 1;
     private long movementTimer;
-    private long functionTimer;
-    private long gravityTime;
+    private long gravityTimer;
     private boolean paused;
     private boolean startScreen;
     private boolean controlsScreen;
     private boolean gameOverScreen;
+    private boolean inGame;
     private boolean swapped;
     private int smallestHighScore;
     private String playerName;
     private Sound lineClearSound;
     private Sound rotateSound;
     private Music bgMusic;
+    private boolean soundsMuted;
+    private String colorTetris = "[RED]T[CYAN]E[MAGENTA]T[ORANGE]R[BLUE]I[GREEN]S[LIGHT_GRAY]";
 
     @Override
     public void create() {
@@ -55,17 +56,14 @@ public class Tetris extends ApplicationAdapter {
         bgMusic.setLooping(true);
         bgMusic.setVolume(0.8F);
         bgMusic.play();
-
-        highScores = new HighScoreTable();
-        getPreferences();
-        tetrisGrid = new String[BOARD_HEIGHT][BOARD_WIDTH];
-        playerScore = 0;
-        playerLevel = 1;
+        soundsMuted = false;
         batch = new SpriteBatch();
         FileHandle fontFile = Gdx.files.getFileHandle("font/novamono.fnt", Files.FileType.Local);
         font = new BitmapFont(fontFile);
         font.setMarkupEnabled(true);
         font.setColor(Color.LIGHT_GRAY);
+        setInputHandler();
+
         start();
     }
 
@@ -77,88 +75,47 @@ public class Tetris extends ApplicationAdapter {
         batch.begin();
         if (startScreen) {
             drawWelcome();
-            if ((System.currentTimeMillis() - functionTimer) > 250) {
-                if (Gdx.input.isKeyPressed(Input.Keys.ENTER)) {
-                    startScreen = false;
-                    resetTimers();
-                }
-                if (Gdx.input.isKeyPressed(Input.Keys.H)) {
-                    startScreen = false;
-                    controlsScreen = true;
-                    resetTimers();
-                }
-                if (Gdx.input.isKeyPressed(Input.Keys.C)) {
-                    highScores = new HighScoreTable();
-                    prefs.clear();
-                    prefs.flush();
-                }
-                if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    exit();
-                }
-            }
         } else if (controlsScreen) {
-            if ((System.currentTimeMillis() - functionTimer) > 250) {
-                if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
-                    startScreen = true;
-                    controlsScreen = false;
-                    functionTimer = System.currentTimeMillis();
-                }
-            }
-            String controls = "UP - Rotate block clockwise\n" +
-                              "LEFT/RIGHT - Move block\n" +
-                              "DOWN - Speed up block\n" +
-                              "SPACE - Drop block\n" +
-                              "SHIFT - Store Block\n" +
-                              "ESC - Pause/Unpause game\n\n" +
-                              "Press ESC to return to the main menu.";
+            String controls = "        [RED]UP[] - Rotate block clockwise\n" +
+                              "[RED]LEFT/RIGHT[] - Move block\n" +
+                              "      [RED]DOWN[] - Speed up block\n" +
+                              "     [RED]SPACE[] - Drop block\n" +
+                              "     [RED]SHIFT[] - Store Block\n" +
+                              "         [RED]M[] - Mute Music\n" +
+                              "         [RED]N[] - Mute Sounds\n" +
+                              "    [RED]Escape[] - Pause/Unpause game";
+            String finalControl = "[RED]Escape[] - Main Menu";
             font.setScale(2F, 2F);
-            font.drawMultiLine(batch, "Controls", 0, Gdx.graphics.getHeight() -
+            font.drawMultiLine(batch, "[CYAN]Controls[]", 0, Gdx.graphics.getHeight() -
                                                      20, Gdx.graphics.getWidth(),
                                HAlignment.CENTER);
             font.setScale(1F, 1F);
-            font.drawMultiLine(batch, controls, 0, Gdx.graphics.getHeight() -
-                                                   100, Gdx.graphics.getWidth(), HAlignment.CENTER);
+            font.drawMultiLine(batch, controls, 130, Gdx.graphics.getHeight() - 100);
+            font.drawMultiLine(batch, finalControl, 0, Gdx.graphics.getHeight() -
+                                                   350, Gdx.graphics.getWidth(), HAlignment.CENTER);
         } else if (paused) {
-            if ((System.currentTimeMillis() - functionTimer) > 250) {
-                if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
-                    paused = false;
-                    resetTimers();
-                }
-                if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    restart();
-                    paused = false;
-                    startScreen = true;
-                    resetTimers();
-                }
-                if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-                    restart();
-                }
-            }
-            String pausedText = "PAUSED\n\n" +
-                                "Push Escape to unpause\n" +
-                                "Push R to Restart\n" +
-                                "Push Q to return to the main menu.";
+            String pausedHeading = "[CYAN]PAUSED[]\n\n";
+            String pausedText = "[RED]Escape[] - Unpause\n" +
+                                "     [RED]R[] - Restart\n" +
+                                "     [RED]Q[] - Main Menu";
+
             font.setScale(2F, 2F);
-            font.drawWrapped(batch, pausedText, 0, Gdx.graphics.getHeight() *
-                                                     0.70F, Gdx.graphics.getWidth(),
+            font.drawWrapped(batch, pausedHeading, 0, Gdx.graphics.getHeight() *
+                                                     0.90F, Gdx.graphics.getWidth(),
                                HAlignment.CENTER);
+            font.setScale(1.5F, 1.5F);
+            font.drawMultiLine(batch, pausedText, 175, Gdx.graphics.getHeight() * 0.80F);
         } else if (gameOverScreen) {
-            String gameOver = "Game Over!\nYou scored: " + playerScore +
-                              "\n\nPush R to Restart" +
-                              "\n\nPush Q to Quit";
+            String gameOver = "[RED]Game Over![]" +
+                              "\nYou Scored: " + playerScore;
+            String gameOverControls = "[RED]R[] - Restart" +
+                                     "\n[RED]Q[] - Quit";
             font.setScale(2F, 2F);
             font.drawMultiLine(batch, gameOver, 0, Gdx.graphics.getHeight() *
-                                                   0.70F, Gdx.graphics.getWidth(),
+                                                   0.80F, Gdx.graphics.getWidth(),
                                HAlignment.CENTER);
-            if ((System.currentTimeMillis() - functionTimer) > 250) {
-                if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
-                    exit();
-                }
-                if (Gdx.input.isKeyPressed(Input.Keys.R)) {
-                    restart();
-                }
-            }
-        } else {
+            font.drawMultiLine(batch, gameOverControls, 250, Gdx.graphics.getHeight() * 0.60F);
+        } else if (inGame) {
             gameLoop();
         }
         batch.end();
@@ -206,10 +163,99 @@ public class Tetris extends ApplicationAdapter {
         resetTimers();
     }
 
+    private void setInputHandler() {
+        Gdx.input.setInputProcessor(new InputAdapter() {
+            @Override
+            public boolean keyDown(int keycode) {
+                if (keycode == Input.Keys.M) {
+                    if (bgMusic.getVolume() > 0F) {
+                        bgMusic.setVolume(0);
+                    } else {
+                        bgMusic.setVolume(0.8F);
+                    }
+                    return true;
+                }
+
+                if (keycode == Input.Keys.N) {
+                    soundsMuted = !soundsMuted;
+                    return true;
+                }
+
+                if (inGame) {
+                    if (keycode == Input.Keys.SPACE) {
+                        hardDrop();
+                        setBlock();
+                        return true;
+                    } else if (keycode == Input.Keys.SHIFT_LEFT) {
+                        if (!swapped) {
+                            swapped = true;
+                            storeBlock();
+                            return true;
+                        }
+                    } else if (keycode == Input.Keys.ESCAPE) {
+                        inGame = false;
+                        paused = true;
+                        return true;
+                    } else if (keycode == Input.Keys.UP) {
+                        doRotate();
+                        return true;
+                    }
+                } else if (startScreen) {
+                    if (keycode == Input.Keys.ENTER) {
+                        start();
+                        startScreen = false;
+                        inGame = true;
+                        return true;
+                    } else if (keycode == Input.Keys.H) {
+                        startScreen = false;
+                        controlsScreen = true;
+                        return true;
+                    } else if (keycode == Input.Keys.C) {
+                        highScores = new HighScoreTable();
+                        prefs.clear();
+                        prefs.flush();
+                        return true;
+                    } else if (keycode == Input.Keys.Q) {
+                        exit();
+                        return true;
+                    }
+                } else if (paused) {
+                    if (keycode == Input.Keys.ESCAPE) {
+                        paused = false;
+                        inGame = true;
+                        return true;
+                    } else if (keycode == Input.Keys.Q) {
+                        paused = false;
+                        startScreen = true;
+                        return true;
+                    } else if (keycode == Input.Keys.R) {
+                        start();
+                        return true;
+                    }
+                } else if (controlsScreen) {
+                    if (keycode == Input.Keys.ESCAPE) {
+                        startScreen = true;
+                        controlsScreen = false;
+                        return true;
+                    }
+                } else if (gameOverScreen) {
+                    if (keycode == Input.Keys.Q) {
+                        exit();
+                        return true;
+                    }
+                    if (keycode == Input.Keys.R) {
+                        start();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+    }
+
     private void resetTimers() {
         movementTimer = System.currentTimeMillis();
-        functionTimer = System.currentTimeMillis();
-        gravityTime = System.currentTimeMillis();
+        gravityTimer = System.currentTimeMillis();
     }
 
     private void exit() {
@@ -299,7 +345,11 @@ public class Tetris extends ApplicationAdapter {
         }
         drawBoard();
         for (int j = 0; j < rowsRemoved; j++) {
-            lineClearSound.play();
+            if (!soundsMuted) {
+                lineClearSound.play();
+            } else {
+                break;
+            }
         }
         for (int i = 0; i < rowsRemoved; i++) {
             for (int k = BOARD_HEIGHT - 1; k > 0; k--) {
@@ -347,28 +397,6 @@ public class Tetris extends ApplicationAdapter {
                 movementTimer = System.currentTimeMillis();
             }
         }
-        if ((System.currentTimeMillis() - functionTimer) > 200 && ! blockSet) {
-            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && ! swapped) {
-                swapped = true;
-                storeBlock();
-                functionTimer = System.currentTimeMillis();
-            }
-            if (Gdx.input.isKeyPressed(Input.Keys.SPACE) &&
-                ! Gdx.input.isKeyPressed(Input.Keys.UP)) {
-                hardDrop();
-                functionTimer = System.currentTimeMillis();
-            }
-            if (Gdx.input.isKeyPressed(Input.Keys.ESCAPE)) {
-                paused = true;
-                functionTimer = System.currentTimeMillis();
-            }
-            if (Gdx.input.isKeyPressed(Input.Keys.UP) &&
-                ! Gdx.input.isKeyPressed(Input.Keys.SPACE)) {
-                doRotate();
-                functionTimer = System.currentTimeMillis();
-            }
-        }
-
     }
 
     private void storeBlock() {
@@ -386,7 +414,6 @@ public class Tetris extends ApplicationAdapter {
             storedBlock.setCenter(new int[] {2, 4});
         }
         updateBlockPosition();
-        functionTimer = System.currentTimeMillis();
     }
 
     private boolean canRotate() {
@@ -410,7 +437,9 @@ public class Tetris extends ApplicationAdapter {
         clearCurrentBlock();
         if (canRotate() && ! blockSet) {
             blockCurrent.rotateBlock();
-            rotateSound.play();
+            if (!soundsMuted) {
+                rotateSound.play();
+            }
         }
         updateBlockPosition();
     }
@@ -503,27 +532,28 @@ public class Tetris extends ApplicationAdapter {
 
     private void drawHeading() {
         font.setScale(2F, 2F);
-        font.drawMultiLine(batch, "TETRIS", 0,
+        font.drawMultiLine(batch, colorTetris, 0,
                            Gdx.graphics.getHeight() - 20,
                            Gdx.graphics.getWidth() * 0.60F, HAlignment.CENTER);
     }
 
-    private TextBounds drawWelcome() {
-        font.setScale(2F, 2F);
-        font.drawMultiLine(batch, "TETRIS", 0, Gdx.graphics.getHeight() -
-                                               20, Gdx.graphics.getWidth(), HAlignment.CENTER);
+    private void drawWelcome() {
+        font.setScale(5F, 5F);
+        font.drawMultiLine(batch, colorTetris, 0,
+                           Gdx.graphics.getHeight() -
+                                               100, Gdx.graphics.getWidth(), HAlignment.CENTER);
 
-        font.setScale(1.5F, 1.5F);
-        String welcomeText = "Welcome.\n" +
-                             "This is tetris.\n\n" +
-                             "Press Enter to start.\n\n" +
-                             "Press H to see the controls.\n\n" +
-                             "Press C to clear the high scores.\n\n" +
-                             "Push Q to Quit";
-        TextBounds welcomeBounds = font.getMultiLineBounds(welcomeText);
+        String welcomeText = "[RED]Enter[] - Start";
+        String homeControls = "[RED]H[] - Controls\n" +
+                              "[RED]C[] - Clear High Scores\n" +
+                              "[RED]M[] - Mute Music\n" +
+                              "[RED]N[] - Mute Sounds\n" +
+                              "[RED]Q[] - Quit";
+        font.setScale(2.5F, 2.5F);
         font.drawMultiLine(batch, welcomeText, 0, Gdx.graphics.getHeight() -
-                                                  100, Gdx.graphics.getWidth(), HAlignment.CENTER);
-        return welcomeBounds;
+                                                  250, Gdx.graphics.getWidth(), HAlignment.CENTER);
+        font.setScale(1.5F, 1.5F);
+        font.drawMultiLine(batch, homeControls, 200, Gdx.graphics.getHeight() - 350);
     }
 
     private void drawBoard() {
