@@ -527,7 +527,10 @@ public class Tetris extends ApplicationAdapter {
         blockNext = new TetrisBlock(randBlock.nextInt(7));
         playerScore += 25;
         swapped = false;
-        lineClearSound.play(1F, 1.5F, 0F);
+
+        if (!soundsMuted) {
+            lineClearSound.play(1F, 1.5F, 0F);
+        }
     }
 
     private void drawHeading() {
